@@ -1,0 +1,4 @@
+stage,model,call_id,uncached_input_tokens,cached_input_tokens,output_tokens,outcome,seconds
+classify,jev-test-model,c1,1000000,0,500000,succeeded,1.5
+classify,jev-test-model,c2,0,0,0,failed,0.4
+verify,haiku-test-model,c3,200000,100000,100000,succeeded,0.9

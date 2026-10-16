@@ -1,0 +1,7 @@
+provider,model,item,price_per_million_tokens,currency,as_of,source_url,verified
+Test,jev-test-model,uncached_input,1.00,USD,2026-10-16,https://example.invalid/synthetic,false
+Test,jev-test-model,cached_input,0.10,USD,2026-10-16,https://example.invalid/synthetic,false
+Test,jev-test-model,output,5.00,USD,2026-10-16,https://example.invalid/synthetic,false
+Test,haiku-test-model,uncached_input,2.00,USD,2026-10-16,https://example.invalid/synthetic,false
+Test,haiku-test-model,cached_input,0.20,USD,2026-10-16,https://example.invalid/synthetic,false
+Test,haiku-test-model,output,10.00,USD,2026-10-16,https://example.invalid/synthetic,false
