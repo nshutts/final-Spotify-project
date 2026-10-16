@@ -1,0 +1,11 @@
+# Secrets: never commit real keys
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.ipynb_checkpoints/
