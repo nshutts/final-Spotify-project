@@ -1,0 +1,9 @@
+{
+  "provider": "Jev (TypeSafe)",
+  "model": "jev-latest",
+  "unit": "USD per 1,000,000 tokens",
+  "input_usd_per_million_tokens": 1.0,
+  "output_usd_per_million_tokens": 5.0,
+  "verified": false,
+  "note": "PLACEHOLDER. Replace with the dated Jev price from the official pricing page before any paid run. The pilot command refuses to run while verified is false."
+}
