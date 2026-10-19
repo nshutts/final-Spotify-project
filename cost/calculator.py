@@ -70,6 +70,9 @@ def cost_by_stage(usage, rates):
         items = {}
         for item in TOKEN_ITEMS:
             rate = rates.get((s["model"], item))
+            if rate is None and s[item] == 0:
+                items[item] = None          # item not billed by this provider and no units used
+                continue
             if rate is None:
                 unknown.append(f"{name}:{item}")
                 items[item] = None

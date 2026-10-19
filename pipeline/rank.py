@@ -1,29 +1,24 @@
-"""Stages 4 and 5 - Group and Rank (code only, no model calls).
+"""Stage 5 - Rank (code only, no model calls). Rerunnable from saved outputs at any time.
 
-Baseline grouping: one issue per topic. Only completed complaint or cancellation
-records count. Each such review belongs to exactly one issue (its topic), so the
-membership has no duplicate (issue_id, review_id) pairs.
-
-Baseline ranking (GRADING_CONTRACT.md):
-    complaint_count = number of member reviews
-    severity_sum    = sum of member severities
+Inputs:  results.jsonl (final record per review) and group/membership.csv.
+Baseline (GRADING_CONTRACT.md):
+    complaint_count = member count;  severity_sum = sum of member severities
     mean_severity   = severity_sum / complaint_count, six decimals, ROUND_HALF_UP
-    priority_score  = severity_sum (exactly count x mean)
-    sort: descending priority_score, then ascending issue_id; ranks start at 1
-
-Outputs: membership.csv, ranking.csv, claims.csv (one row per issue metric).
+    priority_score  = severity_sum   (exactly count x mean, no rounding loss)
+    order: priority_score descending, then issue_id ascending; ranks start at 1
+Only issues with at least one member are ranked.
+Output: rank/ranking.csv
 """
 
 import csv
-import json
 from collections import defaultdict
 from decimal import ROUND_HALF_UP, Decimal
 from pathlib import Path
 
-from pipeline.classify import TOPICS
+from pipeline.common import read_jsonl
 
-COUNTED_INTENTS = ("complaint", "cancellation")
-METRICS = ("complaint_count", "severity_sum", "mean_severity", "priority_score")
+COUNTED = ("complaint", "cancellation")
+COLUMNS = ["rank", "issue_id", "complaint_count", "severity_sum", "mean_severity", "priority_score"]
 
 
 def mean_string(total, count):
@@ -31,69 +26,44 @@ def mean_string(total, count):
     return f"{value:.6f}"
 
 
-def build(records):
-    """records: iterable of dicts. Returns (membership, issues). Raises on contract violations."""
-    members = defaultdict(list)   # issue_id -> [(review_id, severity)]
-    seen_pairs = set()
-    for rec in records:
-        if rec.get("status") != "completed" or rec.get("intent") not in COUNTED_INTENTS:
-            continue
-        issue_id = rec["topic"]
-        if issue_id not in TOPICS:
-            raise ValueError(f"unknown topic on {rec['review_id']}: {issue_id}")
-        pair = (issue_id, rec["review_id"])
-        if pair in seen_pairs:
-            raise ValueError(f"duplicate membership {pair}")
-        seen_pairs.add(pair)
-        members[issue_id].append((rec["review_id"], int(rec["severity"])))
-
-    membership = [(i, rid) for i in sorted(members) for rid, _ in sorted(members[i])]
-    issues = {}
-    for issue_id in TOPICS:
-        rows = members.get(issue_id, [])
-        count = len(rows)
-        total = sum(sev for _, sev in rows)
-        issues[issue_id] = {
-            "complaint_count": count,
-            "severity_sum": total,
-            "mean_severity": mean_string(total, count) if count else "0.000000",
-            "priority_score": total,
-        }
-    return membership, issues
-
-
-def ranking_rows(issues):
-    ordered = sorted(issues.items(), key=lambda kv: (-kv[1]["priority_score"], kv[0]))
-    return [{"rank": n, "issue_id": iid, **vals} for n, (iid, vals) in enumerate(ordered, 1)]
-
-
-def claims_rows(issues):
-    rows = []
-    for iid in TOPICS:
-        for metric in METRICS:
-            rows.append({"claim_id": f"C-{iid}-{metric}", "issue_id": iid, "metric": metric,
-                         "value": str(issues[iid][metric])})
+def compute(latest, membership_rows):
+    sev = defaultdict(list)
+    seen = set()
+    for iid, rid in membership_rows:
+        if (iid, rid) in seen:
+            raise ValueError(f"duplicate membership {(iid, rid)}")
+        seen.add((iid, rid))
+        rec = latest.get(rid)
+        if not rec or rec.get("status") != "completed" or rec.get("intent") not in COUNTED:
+            raise ValueError(f"membership {rid} is not a completed complaint/cancellation")
+        sev[iid].append(int(rec["severity"]))
+    rows = [{"issue_id": iid, "complaint_count": len(v), "severity_sum": sum(v),
+             "mean_severity": mean_string(sum(v), len(v)), "priority_score": sum(v)} for iid, v in sev.items()]
+    rows.sort(key=lambda r: (-r["priority_score"], r["issue_id"]))
+    for n, r in enumerate(rows, 1):
+        r["rank"] = n
     return rows
 
 
-def write_outputs(records_path, out_dir):
-    out = Path(out_dir)
-    out.mkdir(parents=True, exist_ok=True)
-    records = [json.loads(l) for l in Path(records_path).read_text(encoding="utf-8").splitlines() if l.strip()]
-    membership, issues = build(records)
-    with (out / "membership.csv").open("w", encoding="utf-8", newline="") as f:
-        w = csv.writer(f)
-        w.writerow(["issue_id", "review_id"])
-        w.writerows(membership)
-    rank = ranking_rows(issues)
-    with (out / "ranking.csv").open("w", encoding="utf-8", newline="") as f:
-        w = csv.DictWriter(f, fieldnames=["rank", "issue_id", "complaint_count", "severity_sum",
-                                          "mean_severity", "priority_score"])
+def read_membership(path):
+    with Path(path).open(encoding="utf-8", newline="") as f:
+        return [(r["issue_id"], r["review_id"]) for r in csv.DictReader(f)]
+
+
+def run(work_dir, log=print):
+    work = Path(work_dir)
+    latest = {}
+    for rec in read_jsonl(work / "results.jsonl"):
+        latest[rec["review_id"]] = rec
+    rows = compute(latest, read_membership(work / "group" / "membership.csv"))
+    out = work / "rank" / "ranking.csv"
+    out.parent.mkdir(parents=True, exist_ok=True)
+    with out.open("w", encoding="utf-8", newline="") as f:
+        w = csv.DictWriter(f, fieldnames=COLUMNS)
         w.writeheader()
-        for r in rank:
-            w.writerow({k: r[k] for k in w.fieldnames})
-    with (out / "claims.csv").open("w", encoding="utf-8", newline="") as f:
-        w = csv.DictWriter(f, fieldnames=["claim_id", "issue_id", "metric", "value"])
-        w.writeheader()
-        w.writerows(claims_rows(issues))
-    return {"memberships": len(membership), "issues": len(issues), "ranking": rank}
+        for r in rows:
+            w.writerow({k: r[k] for k in COLUMNS})
+    for r in rows[:3]:
+        log(f"rank {r['rank']}: {r['issue_id']} count={r['complaint_count']:,} mean={r['mean_severity']} "
+            f"score={r['priority_score']:,}")
+    return rows

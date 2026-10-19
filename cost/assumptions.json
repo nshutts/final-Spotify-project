@@ -1,0 +1,11 @@
+{
+  "budget_usd": 10,
+  "max_workers": 8,
+  "fallback_fraction": 0,
+  "note": "Editable. Enrich requests: 484,189 distinct texts with exact-text reuse; no_reuse sends all 660,609 nonempty texts.",
+  "scenarios": {
+    "base":         {"enrich_requests": 484189, "retry_rate": 0.01, "verify_sample": 1000, "worker_efficiency": 0.9},
+    "conservative": {"enrich_requests": 484189, "retry_rate": 0.05, "verify_sample": 1000, "worker_efficiency": 0.5, "downstream_multiplier": 2},
+    "no_reuse":     {"enrich_requests": 660609, "retry_rate": 0.01, "verify_sample": 1000, "worker_efficiency": 0.9}
+  }
+}

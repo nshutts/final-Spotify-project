@@ -2,7 +2,7 @@
 
 ## Setup
 
-This project uses Claude (Anthropic) as the LLM provider and Jev (TypeSafe). You need two keys: `ANTHROPIC_API_KEY` and `TYPESAFE_API_KEY`. `OPENAI_API_KEY` is listed in `.env.example` but is not used.
+Every model role in this project uses Jev (TypeSafe), model `jev-1.13.0`. You need one key: `TYPESAFE_API_KEY`. The other variables in `.env.example` are unused.
 
 1. Install dependencies (Python 3.10+):
    ```
@@ -31,3 +31,20 @@ git diff --cached                     # inspect staged changes for secrets
 ```
 
 If `.env` was ever tracked, run `git rm --cached .env` (ignore rules do not untrack it). If a real key is committed or shared, revoke and rotate it immediately; deleting the file does not remove it from Git history.
+
+## Running the pipeline
+
+Put the course dataset files in `data/` (git-ignored): `spotify_reviews_18months.csv`, `cost_100.csv`, `checkpoint_500.csv`, `analysis_10000.csv`.
+
+```
+python3 -m pytest -q                                   # offline tests, no key, no cost
+python3 -m cost.pilot report                           # offline cost report from saved pilot files
+python3 -m cost.pilot run --csv data/cost_100.csv      # PAID: real 100-review cold + warm pilot
+python3 run.py all --csv data/checkpoint_500.csv --work runs/r500 --sample 50        # PAID
+python3 run.py all --csv data/spotify_reviews_18months.csv --work runs/full --workers 8   # PAID: full run
+python3 run.py rank --work runs/full                    # offline: regenerate ranking from saved outputs
+python3 run.py status --work runs/full                  # offline: progress and total spend
+```
+
+Add `--dry-run` to any paid command to exercise it with the offline simulator (no calls, results marked SIMULATED).
+All paid commands share one spend ledger (`runs/spend_ledger.json`) and stop before passing `--cap` (default $10 in total).

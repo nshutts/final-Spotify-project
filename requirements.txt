@@ -1,2 +1,2 @@
 python-dotenv>=1.0
-anthropic
+pytest>=7  # tests only

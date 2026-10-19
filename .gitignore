@@ -9,3 +9,7 @@ __pycache__/
 .venv/
 venv/
 .ipynb_checkpoints/
+
+# Large local data and working runs (dataset is linked in the README, not committed)
+data/
+runs/
