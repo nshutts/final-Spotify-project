@@ -1,82 +1,81 @@
--- Database schema for the Spotify review pipeline (Supabase Postgres).
--- Apply once in the Supabase SQL editor, or with psql using DATABASE_URL from .env.
--- Holds processed results and analysis outputs only. No API keys or raw CSV contents beyond review text.
+-- Database schema for the deployed dashboard (Supabase Postgres).
+-- Apply once: Supabase dashboard -> SQL Editor -> paste this file -> Run.
+-- Holds processed results and analysis outputs from a finished run. No API keys.
+-- Row-level security allows public READ only; writes need the service-role key (loader only).
 
-create table if not exists runs (
-    run_id            text primary key,
-    created_at        timestamptz not null default now(),
-    source_name       text not null,
-    source_sha256     text not null,
-    code_version      text,
-    label_config      text,
-    notes             text
+drop table if exists reviews, issues, claims, evidence, metrics, monthly cascade;
+
+-- One row per source review ID (completed or quarantined), as exported in grading/records.jsonl.
+create table reviews (
+    review_id        text primary key,
+    source_sha256    text not null,
+    status           text not null check (status in ('completed', 'quarantined')),
+    reason           text,
+    topic            text check (topic in ('access','usability','playback','downloads','catalog','billing','support','other')),
+    intent           text check (intent in ('cancellation','complaint','request','praise','unclear')),
+    severity         smallint check (severity between 1 and 5),
+    sentiment        real check (sentiment between -1 and 1),
+    needs_review     boolean,
+    evidence_quote   text,
+    cache_source_id  text,
+    issue_id         text,
+    review_rating    smallint,
+    review_timestamp text
+);
+create index reviews_issue_idx on reviews (issue_id, severity desc);
+
+-- Baseline ranking plus the group role's issue names.
+create table issues (
+    issue_id         text primary key,
+    rank             integer not null,
+    name             text,
+    complaint_count  integer not null,
+    severity_sum     integer not null,
+    mean_severity    text not null,
+    priority_score   integer not null
 );
 
--- One row per source review ID (completed or quarantined). Keeps the original source row hash.
-create table if not exists records (
-    run_id            text not null references runs(run_id),
-    review_id         text not null,
-    source_sha256     text not null,
-    status            text not null check (status in ('completed', 'quarantined', 'pending')),
-    topic             text check (topic in ('access','usability','playback','downloads','catalog','billing','support','other')),
-    intent            text check (intent in ('cancellation','complaint','request','praise','unclear')),
-    sentiment         numeric check (sentiment between -1 and 1),
-    severity          integer check (severity between 1 and 5),
-    entities          jsonb not null default '[]'::jsonb,
-    evidence_quote    text,
-    needs_review      boolean,
-    cancel_probability numeric check (cancel_probability between 0 and 1),
-    label_config      text,
-    cache_source_id   text,
-    reason            text,
-    primary key (run_id, review_id)
+-- claims.csv: every issue-level number the memo cites.
+create table claims (
+    claim_id  text primary key,
+    issue_id  text not null,
+    metric    text not null,
+    value     text not null
 );
 
-create table if not exists membership (
-    run_id            text not null references runs(run_id),
-    issue_id          text not null,
-    review_id         text not null,
-    primary key (run_id, issue_id, review_id)
+-- Bounded evidence packs used by the group and memo roles.
+create table evidence (
+    issue_id   text not null,
+    review_id  text not null,
+    severity   smallint,
+    quote      text,
+    primary key (issue_id, review_id)
 );
 
-create table if not exists ranking (
-    run_id            text not null references runs(run_id),
-    rank              integer not null,
-    issue_id          text not null,
-    complaint_count   integer not null,
-    severity_sum      integer not null,
-    mean_severity     numeric(10,6) not null,
-    priority_score    integer not null,
-    primary key (run_id, issue_id)
+-- Complaint counts per issue per month (for the trend view; first and last months are partial).
+create table monthly (
+    month       text not null,
+    issue_id    text not null,
+    complaints  integer not null,
+    reviews     integer not null,
+    primary key (month, issue_id)
 );
 
-create table if not exists claims (
-    run_id            text not null references runs(run_id),
-    claim_id          text not null,
-    issue_id          text not null,
-    metric            text not null,
-    value             text not null,
-    primary key (run_id, claim_id)
+-- Key/value documents: overall metrics, memo decision and text, verifier and golden results, run summary.
+create table metrics (
+    key    text primary key,
+    value  jsonb not null
 );
 
-create table if not exists calls (
-    run_id            text not null references runs(run_id),
-    call_seq          bigint generated always as identity,
-    role              text not null check (role in ('classify','enrich','verify','group','memo')),
-    model             text,
-    phase             text,
-    outcome           text not null check (outcome in ('succeeded','failed')),
-    status            integer,
-    input_tokens      integer,
-    output_tokens     integer,
-    review_ids        jsonb not null default '[]'::jsonb,
-    primary key (run_id, call_seq)
-);
-
--- Read-only views the backend uses. They compute nothing new: they read saved tables.
-create or replace view issue_summary as
-    select r.run_id, r.issue_id, r.complaint_count, r.severity_sum, r.mean_severity, r.priority_score, r.rank
-    from ranking r;
-
-create or replace view status_counts as
-    select run_id, status, count(*) as n from records group by run_id, status;
+alter table reviews  enable row level security;
+alter table issues   enable row level security;
+alter table claims   enable row level security;
+alter table evidence enable row level security;
+alter table monthly  enable row level security;
+alter table metrics  enable row level security;
+create policy public_read on reviews  for select using (true);
+create policy public_read on issues   for select using (true);
+create policy public_read on claims   for select using (true);
+create policy public_read on evidence for select using (true);
+create policy public_read on monthly  for select using (true);
+create policy public_read on metrics  for select using (true);

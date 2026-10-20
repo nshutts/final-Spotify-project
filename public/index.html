@@ -1,0 +1,328 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Spotify Review Priorities</title>
+<meta name="description" content="Where Spotify's next quarter of product effort should go, from 660,622 classified Google Play reviews.">
+<style>
+  :root {
+    --bg: #f6f5f1; --panel: #ffffff; --ink: #1d1d1b; --muted: #6b6a64; --line: #e3e1da;
+    --accent: #1f7a4d; --accent-soft: #e3f1e9; --warn: #a4501f; --bar: #2f6f9f; --bar-soft: #dfeaf3;
+    --chip: #efede6;
+    --s1: #2f6f9f; --s2: #c0612b; --s3: #3d8a5a; --s4: #8a5aa8; --s5: #b8962e;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #141513; --panel: #1d1e1b; --ink: #ecebe6; --muted: #a09f98; --line: #34352f;
+      --accent: #5cc08a; --accent-soft: #1f3528; --warn: #e3935f; --bar: #6ea8d6; --bar-soft: #22313d;
+      --chip: #2a2b27;
+      --s1: #6ea8d6; --s2: #e3935f; --s3: #6cc08d; --s4: #b994d4; --s5: #d9bb5c;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink);
+         font: 15px/1.5 ui-sans-serif, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 28px 16px 64px; }
+  header h1 { font-size: 26px; line-height: 1.2; margin: 0 0 6px; letter-spacing: -0.01em; }
+  header p { margin: 0; color: var(--muted); max-width: 760px; }
+  .grid { display: grid; gap: 14px; }
+  .kpis { grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); margin: 22px 0; }
+  .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 18px; }
+  .kpi .v { font-size: 24px; font-weight: 650; font-variant-numeric: tabular-nums; }
+  .kpi .l { color: var(--muted); font-size: 13px; }
+  h2 { font-size: 17px; margin: 0 0 12px; }
+  h3 { font-size: 15px; margin: 18px 0 8px; }
+  .rec { border-left: 4px solid var(--accent); }
+  .rec .big { font-size: 22px; font-weight: 650; margin: 2px 0 8px; }
+  .muted { color: var(--muted); }
+  .small { font-size: 13px; }
+  .two { grid-template-columns: 1.3fr 1fr; }
+  @media (max-width: 820px) { .two { grid-template-columns: 1fr; } }
+  table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+  th, td { text-align: left; padding: 8px 6px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); font-weight: 600; }
+  td.n, th.n { text-align: right; }
+  tr.click { cursor: pointer; }
+  tr.click:hover td, tr.sel td { background: var(--bar-soft); }
+  .barcell { width: 26%; }
+  .bar { height: 10px; background: var(--bar); border-radius: 3px; }
+  .barbg { background: var(--bar-soft); border-radius: 3px; }
+  .chip { display: inline-block; background: var(--chip); border-radius: 4px; padding: 0 5px; font-size: 11px;
+          font-family: ui-monospace, Menlo, monospace; color: var(--muted); white-space: nowrap; }
+  .area-row { display: grid; grid-template-columns: 130px 1fr 56px; gap: 10px; align-items: center; margin: 6px 0; }
+  .area-row .track { background: var(--accent-soft); border-radius: 3px; height: 12px; }
+  .area-row .fill { background: var(--accent); height: 12px; border-radius: 3px; }
+  .scroll { overflow-x: auto; }
+  .quote { font-size: 14px; }
+  .sev { display: inline-block; min-width: 22px; text-align: center; border-radius: 4px; font-weight: 600; font-size: 12px;
+         background: var(--chip); }
+  .sev4, .sev5 { background: var(--warn); color: #fff; }
+  .legend { display: flex; flex-wrap: wrap; gap: 12px; font-size: 12px; color: var(--muted); margin-top: 6px; }
+  .legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 5px; vertical-align: -1px; }
+  svg text { fill: var(--muted); font-size: 11px; }
+  .memo { white-space: normal; }
+  .memo table { font-size: 13px; }
+  input[type=text] { width: 100%; padding: 8px 10px; border: 1px solid var(--line); border-radius: 6px; background: var(--bg); color: var(--ink); font: inherit; }
+  button { padding: 8px 12px; border: 1px solid var(--line); border-radius: 6px; background: var(--chip); color: var(--ink); font: inherit; cursor: pointer; }
+  .row { display: flex; gap: 8px; }
+  pre.json { background: var(--bg); padding: 10px; border-radius: 6px; overflow-x: auto; font-size: 12px; }
+  footer { margin-top: 28px; color: var(--muted); font-size: 13px; }
+  a { color: var(--bar); }
+  .err { color: var(--warn); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Where should Spotify's next quarter of product effort go?</h1>
+    <p>Every one of 660,622 Google Play reviews (May 2022 to Nov 2023) was classified by a staged pipeline
+      (Jev for labels, code for validation and arithmetic). Figures below are read live from the project database.</p>
+  </header>
+
+  <div id="status" class="muted small" style="margin-top:14px">Loading data from the database…</div>
+
+  <section class="grid kpis" id="kpis"></section>
+
+  <section class="grid two">
+    <div class="panel rec" id="rec"></div>
+    <div class="panel" id="areas"></div>
+  </section>
+
+  <section class="panel" style="margin-top:14px">
+    <h2>Issue ranking (baseline)</h2>
+    <p class="muted small" style="margin-top:-6px">Priority score = complaint count × mean severity (= severity sum).
+      Complaint and cancellation reviews only; each review counts once. Click a row to inspect its reviews.</p>
+    <div class="scroll"><table id="rank"></table></div>
+  </section>
+
+  <section class="panel" style="margin-top:14px" id="drill">
+    <h2 id="drill-title">Review evidence</h2>
+    <p class="muted small" id="drill-sub">Select an issue above.</p>
+    <div class="scroll"><table id="drill-table"></table></div>
+    <div class="row" style="margin-top:10px"><button id="more" hidden>Load 25 more</button></div>
+  </section>
+
+  <section class="grid two" style="margin-top:14px">
+    <div class="panel">
+      <h2>Complaint share by month</h2>
+      <p class="muted small" style="margin-top:-6px">Share of each month's reviews that are complaints in the issue.
+        First and last months are partial.</p>
+      <div id="trend"></div>
+    </div>
+    <div class="panel" id="quality"></div>
+  </section>
+
+  <section class="panel" style="margin-top:14px">
+    <h2>Decision memo</h2>
+    <div class="memo" id="memo"></div>
+  </section>
+
+  <section class="panel" style="margin-top:14px">
+    <h2>Look up a review</h2>
+    <div class="row"><input type="text" id="rid" placeholder="Paste a review_id"><button id="go">Find</button></div>
+    <pre class="json" id="rid-out" hidden></pre>
+  </section>
+
+  <footer>
+    Backend: Vercel functions <code>/api/summary</code> and <code>/api/reviews</code> reading Supabase Postgres.
+    Source and evidence: <a href="https://github.com/nshutts/final-Spotify-project">github.com/nshutts/final-Spotify-project</a>.
+    Reviews are self-selected and historical; cancellation language is expressed intent, not observed churn.
+  </footer>
+</div>
+
+<script>
+const fmt = (n) => (n === null || n === undefined || n === "") ? "–" : Number(n).toLocaleString("en-US");
+const pct = (x, d = 0) => (x === null || x === undefined) ? "–" : (x * 100).toFixed(d) + "%";
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const AREA = { access: "Access", usability: "Usability", playback: "Playback", billing_support: "Billing / support" };
+const AREA_ISSUES = { access: ["ISS-ACCESS"], usability: ["ISS-USABILITY"], playback: ["ISS-PLAYBACK"], billing_support: ["ISS-BILLING", "ISS-SUPPORT"] };
+const COLORS = ["--s1", "--s2", "--s3", "--s4", "--s5"];
+let DATA = null, drillIssue = null, drillOffset = 0;
+
+function claimChip(iid, metric) { return `<span class="chip">C-${esc(iid)}-${metric}</span>`; }
+
+function renderKpis(o) {
+  const items = [
+    [fmt(o.source_rows), "source reviews accounted for"],
+    [fmt(o.completed), "classified"],
+    [fmt(o.quarantined + o.not_classified), `quarantined (${fmt(o.quarantined)} empty text${o.not_classified ? ", " + fmt(o.not_classified) + " unfinished" : ""})`],
+    [fmt(o.complaints), "complaint or cancellation reviews"],
+    [fmt(o.distinct_texts_labelled), `distinct texts sent to Jev (${fmt(o.cache_copies)} exact-duplicate copies)`],
+    [o.total_api_spend_usd_all_runs != null ? "$" + Number(o.total_api_spend_usd_all_runs).toFixed(2) : "–", `total API spend, all runs (cap $${o.spend_cap_usd ?? 10})`],
+  ];
+  document.getElementById("kpis").innerHTML = items.map(([v, l]) =>
+    `<div class="panel kpi"><div class="v">${v}</div><div class="l">${esc(l)}</div></div>`).join("");
+}
+
+function areaNumbers(issues) {
+  const by = Object.fromEntries(issues.map((i) => [i.issue_id, i]));
+  const total = issues.reduce((s, i) => s + i.complaint_count, 0);
+  const out = {};
+  for (const [a, ids] of Object.entries(AREA_ISSUES)) {
+    const rows = ids.filter((i) => by[i]);
+    const c = rows.reduce((s, i) => s + by[i].complaint_count, 0), sc = rows.reduce((s, i) => s + by[i].priority_score, 0);
+    out[a] = { ids: rows, count: c, score: sc, share: total ? c / total : 0, mean: c ? sc / c : 0 };
+  }
+  return out;
+}
+
+function renderRec(d) {
+  const dec = d.metrics.memo_decision || {}, areas = areaNumbers(d.issues);
+  const choice = dec.choice, probs = dec.probabilities || {};
+  const ranked = Object.keys(AREA).sort((a, b) => areas[b].score - areas[a].score);
+  const lead = choice ? areas[choice] : null;
+  const ids = choice ? AREA_ISSUES[choice].filter((i) => d.issues.some((x) => x.issue_id === i)) : [];
+  let html = `<h2>AI recommendation</h2>`;
+  if (choice) {
+    html += `<div class="big">Prioritise ${esc(AREA[choice])}</div>
+      <p>The memo agent (Jev, role <code>memo</code>) read only the saved aggregates and a bounded evidence pack and chose
+      <b>${esc(AREA[choice])}</b>${probs[choice] != null ? ` with probability ${Number(probs[choice]).toFixed(2)}` : ""}.</p>
+      <p>${esc(AREA[choice])} accounts for <b>${fmt(lead.count)}</b> complaint reviews (${pct(lead.share, 1)} of all complaints),
+      mean severity <b>${lead.mean.toFixed(2)}</b> and priority score <b>${fmt(lead.score)}</b>
+      ${ids.map((i) => claimChip(i, "priority_score")).join(" ")}.</p>`;
+    const base = ranked[0];
+    html += base === choice
+      ? `<p class="muted small">This matches the baseline: it has the highest priority score of the four candidate areas.</p>`
+      : `<p class="muted small">By baseline priority score ${esc(AREA[base])} ranks first among the four areas (${fmt(areas[base].score)}). The model weighed severity as well as volume; both views are shown.</p>`;
+  } else {
+    html += `<p class="err">No model recommendation stored yet.</p>`;
+  }
+  html += `<h3>Alternatives</h3><ul class="small">` + ranked.filter((a) => a !== choice).map((a) =>
+    `<li><b>${esc(AREA[a])}</b>: ${fmt(areas[a].count)} complaints, mean severity ${areas[a].mean.toFixed(2)}, score ${fmt(areas[a].score)} ${areas[a].ids.map((i) => claimChip(i, "priority_score")).join(" ")}</li>`).join("") + `</ul>`;
+  document.getElementById("rec").innerHTML = html;
+
+  const maxP = Math.max(...Object.values(probs).map(Number), 0.0001);
+  document.getElementById("areas").innerHTML = `<h2>The four candidate areas</h2>
+    <p class="muted small" style="margin-top:-6px">Memo-agent probability for each area, with the baseline numbers behind it.</p>` +
+    Object.keys(AREA).sort((a, b) => (probs[b] || 0) - (probs[a] || 0)).map((a) => `
+      <div class="area-row"><div>${esc(AREA[a])}</div>
+        <div class="track"><div class="fill" style="width:${((probs[a] || 0) / maxP * 100).toFixed(1)}%"></div></div>
+        <div class="small n" style="text-align:right">${probs[a] != null ? Number(probs[a]).toFixed(2) : "–"}</div></div>
+      <div class="muted small" style="margin:-2px 0 8px 140px">${fmt(areas[a].count)} complaints · share ${pct(areas[a].share, 1)} · score ${fmt(areas[a].score)}</div>`).join("") +
+    `<p class="muted small">"Other" (general criticism with no specific feature) is ranked but is not a product area the memo can assign.</p>`;
+}
+
+function renderRank(d) {
+  const max = Math.max(...d.issues.map((i) => i.priority_score), 1);
+  const t = document.getElementById("rank");
+  t.innerHTML = `<thead><tr><th>#</th><th>Issue</th><th>Dominant problem (group agent)</th><th class="n">Complaints</th>
+    <th class="n">Mean severity</th><th class="n">Priority score</th><th class="barcell"></th></tr></thead><tbody>` +
+    d.issues.map((i) => `<tr class="click" data-iid="${esc(i.issue_id)}">
+      <td>${i.rank}</td><td><b>${esc(i.issue_id)}</b></td><td>${esc(i.name || "")}</td>
+      <td class="n">${fmt(i.complaint_count)}<br>${claimChip(i.issue_id, "complaint_count")}</td>
+      <td class="n">${esc(i.mean_severity)}<br>${claimChip(i.issue_id, "mean_severity")}</td>
+      <td class="n"><b>${fmt(i.priority_score)}</b><br>${claimChip(i.issue_id, "priority_score")}</td>
+      <td class="barcell"><div class="barbg"><div class="bar" style="width:${(i.priority_score / max * 100).toFixed(1)}%"></div></div></td></tr>`).join("") + "</tbody>";
+  t.querySelectorAll("tr.click").forEach((r) => r.addEventListener("click", () => drill(r.dataset.iid, true)));
+}
+
+async function drill(iid, reset) {
+  document.querySelectorAll("#rank tr").forEach((r) => r.classList.toggle("sel", r.dataset.iid === iid));
+  if (reset) { drillIssue = iid; drillOffset = 0; document.getElementById("drill-table").innerHTML = ""; }
+  const issue = DATA.issues.find((i) => i.issue_id === iid);
+  document.getElementById("drill-title").textContent = `${iid}: ${issue?.name || ""}`;
+  document.getElementById("drill-sub").textContent = `${fmt(issue?.complaint_count)} member reviews, highest severity first. Loaded from /api/reviews.`;
+  const r = await fetch(`/api/reviews?issue=${encodeURIComponent(iid)}&limit=25&offset=${drillOffset}`);
+  const j = await r.json();
+  if (!r.ok) { document.getElementById("drill-sub").innerHTML = `<span class="err">${esc(j.error)}</span>`; return; }
+  const tb = document.getElementById("drill-table");
+  if (reset) tb.innerHTML = `<thead><tr><th>Severity</th><th>Review (evidence quote)</th><th>Intent</th><th>Stars</th><th>review_id</th></tr></thead><tbody></tbody>`;
+  tb.querySelector("tbody").insertAdjacentHTML("beforeend", j.reviews.map((v) => `<tr>
+    <td><span class="sev sev${v.severity}">${v.severity}</span></td><td class="quote">${esc(v.evidence_quote)}</td>
+    <td>${esc(v.intent)}${v.needs_review ? ' <span class="chip">review</span>' : ""}</td><td>${v.review_rating ?? ""}</td>
+    <td><span class="chip">${esc(v.review_id)}</span></td></tr>`).join(""));
+  drillOffset += j.reviews.length;
+  document.getElementById("more").hidden = j.reviews.length < 25;
+}
+
+function renderTrend(d) {
+  const top = d.issues.filter((i) => i.issue_id !== "ISS-OTHER").slice(0, 5).map((i) => i.issue_id);
+  const months = [...new Set(d.monthly.map((m) => m.month))].sort();
+  const val = {};
+  d.monthly.forEach((m) => { val[m.month + "|" + m.issue_id] = m.reviews ? m.complaints / m.reviews : 0; });
+  const W = 520, H = 220, L = 38, B = 26, T = 8, R = 8;
+  const ymax = Math.max(0.01, ...top.flatMap((i) => months.map((m) => val[m + "|" + i] || 0))) * 1.1;
+  const x = (k) => L + (W - L - R) * (months.length > 1 ? k / (months.length - 1) : 0);
+  const y = (v) => T + (H - T - B) * (1 - v / ymax);
+  let svg = `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Monthly complaint share by issue">`;
+  for (let g = 0; g <= 4; g++) {
+    const v = ymax * g / 4;
+    svg += `<line x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)"/><text x="${L - 6}" y="${y(v) + 4}" text-anchor="end">${(v * 100).toFixed(0)}%</text>`;
+  }
+  months.forEach((m, k) => { if (k % 3 === 0) svg += `<text x="${x(k)}" y="${H - 8}" text-anchor="middle">${m.slice(2)}</text>`; });
+  top.forEach((iid, n) => {
+    const pts = months.map((m, k) => `${x(k).toFixed(1)},${y(val[m + "|" + iid] || 0).toFixed(1)}`).join(" ");
+    svg += `<polyline fill="none" stroke="var(${COLORS[n]})" stroke-width="2" points="${pts}"><title>${iid}</title></polyline>`;
+  });
+  svg += `</svg><div class="legend">` + top.map((iid, n) => `<span><i style="background:var(${COLORS[n]})"></i>${esc(iid)}</span>`).join("") + `</div>`;
+  document.getElementById("trend").innerHTML = svg;
+}
+
+function renderQuality(d) {
+  const v = d.metrics.verify || {}, g = d.metrics.golden || {};
+  const a = v.agreement || {}, ga = g.agreement || {};
+  let html = `<h2>How reliable are the labels?</h2>
+    <h3 style="margin-top:4px">Independent verifier (Jev, separate questions, blind to first answer)</h3>
+    <p class="small">${fmt(v.verified)} randomly sampled reviews. Agreement: topic ${pct(a.topic)}, intent ${pct(a.intent)},
+      severity ${pct(a.severity)}; all three ${pct(a.all_three)}. Planted wrong label: <b>${esc(v.planted_error_test?.status || "–")}</b>.</p>
+    <h3>Golden set (50 hand-labelled reviews)</h3>`;
+  html += ga.topic != null
+    ? `<p class="small">Topic ${pct(ga.topic)}, intent ${pct(ga.intent)}, severity exact ${pct(ga.severity)} (MAE ${g.severity_mae});
+       sentiment MAE ${g.sentiment_mae}; ${g.ambiguous_cases} cases marked ambiguous. A 50-review diagnostic sample, not a population estimate.</p>`
+    : `<p class="small muted">Not loaded yet.</p>`;
+  const o = d.metrics.overall || {};
+  html += `<h3>Run</h3><p class="small">Model <code>${esc(o.model)}</code>, label config <code>${esc(o.label_config)}</code>;
+    ${fmt(o.enrich_requests)} enrichment requests (≤20 reviews each), ${fmt(o.enrich_failed_attempts)} failed attempts retried;
+    interrupted and resumed: ${esc((o.enrich_sessions || []).map((s) => s.phase + " → " + s.stop_reason).join(", "))}.</p>`;
+  document.getElementById("quality").innerHTML = html;
+}
+
+function md(text) {
+  const lines = text.split("\n"); let out = "", inTable = false, inList = false;
+  const inline = (s) => esc(s).replace(/\*\*(.+?)\*\*/g, "<b>$1</b>").replace(/`([^`]+)`/g, "<code>$1</code>")
+    .replace(/\[(C-[A-Z]+-[a-z_]+)\]/g, '<span class="chip">$1</span>');
+  for (const l of lines) {
+    if (l.startsWith("|")) {
+      if (/^\|[-| ]+\|$/.test(l)) continue;
+      const cells = l.slice(1, -1).split("|").map((c) => c.trim());
+      if (!inTable) { out += '<div class="scroll"><table><tr>' + cells.map((c) => `<th>${inline(c)}</th>`).join("") + "</tr>"; inTable = true; }
+      else out += "<tr>" + cells.map((c) => `<td>${inline(c)}</td>`).join("") + "</tr>";
+      continue;
+    } else if (inTable) { out += "</table></div>"; inTable = false; }
+    if (l.startsWith("- ")) { if (!inList) { out += "<ul>"; inList = true; } out += `<li>${inline(l.slice(2))}</li>`; continue; }
+    else if (inList) { out += "</ul>"; inList = false; }
+    if (l.startsWith("# ")) continue;
+    if (l.startsWith("## ")) out += `<h3>${inline(l.slice(3))}</h3>`;
+    else if (l.trim()) out += `<p>${inline(l)}</p>`;
+  }
+  if (inTable) out += "</table></div>"; if (inList) out += "</ul>";
+  return out;
+}
+
+async function main() {
+  try {
+    const r = await fetch("/api/summary");
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.error || r.status);
+    DATA = d;
+    const o = d.metrics.overall || {};
+    document.getElementById("status").textContent = `Loaded from the database (${o.loaded_at ? "data loaded " + o.loaded_at : "live"}).`;
+    renderKpis(o); renderRec(d); renderRank(d); renderTrend(d); renderQuality(d);
+    document.getElementById("memo").innerHTML = md(d.metrics.memo_markdown?.text || "No memo stored.");
+    const first = d.issues.find((i) => i.issue_id !== "ISS-OTHER") || d.issues[0];
+    if (first) drill(first.issue_id, true);
+  } catch (e) {
+    document.getElementById("status").innerHTML = `<span class="err">Could not load data: ${esc(e.message)}</span>`;
+  }
+}
+document.getElementById("more").addEventListener("click", () => drill(drillIssue, false));
+document.getElementById("go").addEventListener("click", async () => {
+  const id = document.getElementById("rid").value.trim(); if (!id) return;
+  const out = document.getElementById("rid-out"); out.hidden = false; out.textContent = "Loading…";
+  const r = await fetch(`/api/reviews?id=${encodeURIComponent(id)}`); out.textContent = JSON.stringify(await r.json(), null, 2);
+});
+main();
+</script>
+</body>
+</html>
