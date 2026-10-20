@@ -1,0 +1,8 @@
+review_id,field,enrich,verifier
+035213ba-b1b9-411c-b028-70296e5f0e73,severity,2,3
+084077ee-f9be-446a-9935-9e58550d5153,intent,praise,unclear
+1807cc68-ba99-4edc-b6f1-2a1478e69109,severity,2,3
+486d1d7a-d6f6-41ea-81ad-ed875452729c,intent,complaint,cancellation
+6c257eba-3dca-49f6-b7f0-4c4484d81e26,severity,2,3
+e16a4550-43e7-4ae1-b538-a65cc652c31b,severity,3,4
+e25cf0b6-0285-4cc9-9a4a-5a8a05be929e,topic,other,catalog

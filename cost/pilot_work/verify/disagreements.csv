@@ -1,0 +1,10 @@
+review_id,field,enrich,verifier
+035213ba-b1b9-411c-b028-70296e5f0e73,severity,3,2
+084077ee-f9be-446a-9935-9e58550d5153,intent,praise,unclear
+1807cc68-ba99-4edc-b6f1-2a1478e69109,severity,2,3
+2d5cdd20-3094-40a5-bc6e-653302b59b56,severity,2,1
+486d1d7a-d6f6-41ea-81ad-ed875452729c,severity,4,2
+d146397f-4a94-4980-be00-ae9212eca3a7,severity,4,3
+e16a4550-43e7-4ae1-b538-a65cc652c31b,intent,cancellation,complaint
+e16a4550-43e7-4ae1-b538-a65cc652c31b,severity,3,4
+e25cf0b6-0285-4cc9-9a4a-5a8a05be929e,topic,other,catalog

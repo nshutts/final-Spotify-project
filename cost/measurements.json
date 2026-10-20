@@ -1,0 +1,77 @@
+{
+  "input_csv": "data/cost_100.csv",
+  "input_sha256": "c884ac3b9be5066995d5063f96ad9af6e5e082975788c1684c4f6b6ea661dd0e",
+  "provider": "TypeSafe Jev",
+  "model": "jev-1.13.0",
+  "workers": 1,
+  "reviews_per_request": 20,
+  "verify_sample": 20,
+  "runs": {
+    "pilot-cold": {
+      "wall_seconds": 7.055,
+      "stage_seconds": {
+        "prepare": 0.003,
+        "enrich": 1.049,
+        "verify": 4.484,
+        "group": 1.302,
+        "rank": 0.004,
+        "memo": 0.213
+      },
+      "call_log_lines": [
+        0,
+        34
+      ],
+      "enrich": {
+        "requests": 5,
+        "attempts": 5,
+        "failed_attempts": 0,
+        "completed_new": 100,
+        "cache_copies": 0,
+        "quarantined": 0,
+        "skipped_done": 0,
+        "input_tokens": 42752,
+        "output_tokens": 20690
+      },
+      "verify_new_calls": 20,
+      "group_new_calls": 8,
+      "memo_new_calls": 1
+    },
+    "pilot-warm": {
+      "wall_seconds": 0.02,
+      "stage_seconds": {
+        "enrich": 0.005,
+        "verify": 0.006,
+        "group": 0.003,
+        "rank": 0.002,
+        "memo": 0.003
+      },
+      "call_log_lines": [
+        34,
+        34
+      ],
+      "enrich": {
+        "requests": 0,
+        "attempts": 0,
+        "failed_attempts": 0,
+        "completed_new": 0,
+        "cache_copies": 0,
+        "quarantined": 0,
+        "skipped_done": 100,
+        "input_tokens": 0,
+        "output_tokens": 0
+      },
+      "verify_new_calls": 0,
+      "group_new_calls": 0,
+      "memo_new_calls": 0
+    }
+  },
+  "prepare": {
+    "rows": 100,
+    "nonempty_rows": 100,
+    "empty_review_text": 0,
+    "distinct_nonempty_texts": 100,
+    "exact_duplicate_rows": 0
+  },
+  "unique_texts": 100,
+  "measured_at": "2026-10-20T14:15:43"
+}

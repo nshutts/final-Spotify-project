@@ -1,0 +1,86 @@
+{
+  "input_hash": "e134a24971300a48b4aea282886d714537d50a8b268eb0417085fe72aff50094",
+  "prompt_version": "memo-v1",
+  "choice": "usability",
+  "probabilities": {
+    "access": 0.0,
+    "usability": 1.0,
+    "playback": 0.0,
+    "billing_support": 0.0
+  },
+  "state_sent": {
+    "question": "Where should the next quarter of Spotify product effort go?",
+    "metric_definitions": {
+      "complaint_count": "complaint or cancellation reviews in the area",
+      "severity_sum": "sum of severity 1-5 over those reviews (priority score)",
+      "share_of_all_complaints": "complaint_count / all complaint reviews"
+    },
+    "areas": {
+      "access": {
+        "issues": [
+          "ISS-ACCESS"
+        ],
+        "complaint_count": 2,
+        "severity_sum": 8,
+        "share_of_all_complaints": 0.0392,
+        "issue_names": [
+          "login or sign-in failures"
+        ],
+        "examples": [
+          "It not letting me into my account and there are to many ads",
+          "Will not except my password"
+        ]
+      },
+      "usability": {
+        "issues": [
+          "ISS-USABILITY"
+        ],
+        "complaint_count": 16,
+        "severity_sum": 43,
+        "share_of_all_complaints": 0.3137,
+        "issue_names": [
+          "too many or intrusive ads"
+        ],
+        "examples": [
+          "The update made the app useless .... Uninstall krdia ye app ab bekar hai ... Wynk hi theek h",
+          "Your new features are really bad thing that I found because it plays any song of the Playlist randomly it really really disappointing for and listeners who don't need disturbance in their song patterns.",
+          "I am using Spotify from past two years From last update they removed basic features of music player"
+        ]
+      },
+      "playback": {
+        "issues": [
+          "ISS-PLAYBACK"
+        ],
+        "complaint_count": 5,
+        "severity_sum": 19,
+        "share_of_all_complaints": 0.098,
+        "issue_names": [
+          "mixed playback problems"
+        ],
+        "examples": [
+          "I am unable to use my Google assistant on the app.it says playing your Spotify playlist but do not play the songs",
+          "Iam a premium user. But this app if i using wifi not able to connect Internet. But if using mobile data it will work. Some songs quality also very poor comparing to the YouTube music.",
+          "The latest update has caused my app to crash I cant open the app please fix."
+        ]
+      },
+      "billing_support": {
+        "issues": [
+          "ISS-BILLING"
+        ],
+        "complaint_count": 7,
+        "severity_sum": 20,
+        "share_of_all_complaints": 0.1373,
+        "issue_names": [
+          "basic features locked behind Premium"
+        ],
+        "examples": [
+          "This app the new update has made everthing premium and so usless i thought this app is good but no.",
+          "I would request to remove all the new features .what's the point if we dont get to go back to the same song or skip songs..or choose .its not fair ..to restrict all the features jst so people would purchase premium ..its like forcing ..to d",
+          "Recent update really sucks. The ability to skip a song or go to previous song has been removed from non subscribed users."
+        ]
+      }
+    }
+  },
+  "confidence": 1.0,
+  "model": "jev-1.13.0"
+}

@@ -1,0 +1,89 @@
+{
+  "input_hash": "1e005a99a92ed086a19d89a530efa7cb03ff0b59a37ef510af4e35ff7d3aba3e",
+  "prompt_version": "memo-v1",
+  "choice": "usability",
+  "probabilities": {
+    "access": 0.0,
+    "usability": 1.0,
+    "playback": 0.0,
+    "billing_support": 0.0
+  },
+  "state_sent": {
+    "question": "Where should the next quarter of Spotify product effort go?",
+    "metric_definitions": {
+      "complaint_count": "complaint or cancellation reviews in the area",
+      "severity_sum": "sum of severity 1-5 over those reviews (priority score)",
+      "share_of_all_complaints": "complaint_count / all complaint reviews"
+    },
+    "areas": {
+      "access": {
+        "issues": [
+          "ISS-ACCESS"
+        ],
+        "complaint_count": 3,
+        "severity_sum": 11,
+        "share_of_all_complaints": 0.0638,
+        "issue_names": [
+          "login or sign-in failures"
+        ],
+        "examples": [
+          "It not letting me into my account and there are to many ads",
+          "Will not except my password",
+          "Iam a premium user. But this app if i using wifi not able to connect Internet. But if using mobile data it will work. Some songs quality also very poor comparing to the YouTube music."
+        ]
+      },
+      "usability": {
+        "issues": [
+          "ISS-USABILITY"
+        ],
+        "complaint_count": 15,
+        "severity_sum": 40,
+        "share_of_all_complaints": 0.3191,
+        "issue_names": [
+          "too many or intrusive ads"
+        ],
+        "examples": [
+          "What kind of stupidity is this? Na queue m lgte h gaane, na skip kr skte h, na random chla skte h, kya bkchodi h ye??? Jaruri h premium lena? Nhi lena bhai thodi to sharam kro saare paise tumhi kma loge kya💀💀 alag hi pagapan h",
+          "I m using this app from 5 to 6 year but now m uninstald this app cz his premium adds are everywhere now .",
+          "The update made the app useless .... Uninstall krdia ye app ab bekar hai ... Wynk hi theek h"
+        ]
+      },
+      "playback": {
+        "issues": [
+          "ISS-PLAYBACK"
+        ],
+        "complaint_count": 4,
+        "severity_sum": 14,
+        "share_of_all_complaints": 0.0851,
+        "issue_names": [
+          "mixed playback problems"
+        ],
+        "examples": [
+          "The latest update has caused my app to crash I cant open the app please fix.",
+          "App is stuck on loading/logo screen",
+          "I am unable to use my Google assistant on the app.it says playing your Spotify playlist but do not play the songs"
+        ]
+      },
+      "billing_support": {
+        "issues": [
+          "ISS-BILLING",
+          "ISS-SUPPORT"
+        ],
+        "complaint_count": 5,
+        "severity_sum": 17,
+        "share_of_all_complaints": 0.1064,
+        "issue_names": [
+          "basic features locked behind Premium",
+          "unhelpful support"
+        ],
+        "examples": [
+          "You can't even listen to music you want it just shuffles it, like what the hell? This app is killing it self and forcing you to pay premium for basic things like just listening to music.",
+          "Why it requires premium just to play next music / to choose music ?? And why the specific part of song cannot be played ?",
+          "This was fine till the last update, now you can't even pick a certain song without Spotify premium, and now you can only skip 6 songs, like please just let the songs fit my mood!"
+        ]
+      }
+    }
+  },
+  "confidence": 1.0,
+  "model": "jev-1.13.0"
+}

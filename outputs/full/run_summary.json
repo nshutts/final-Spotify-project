@@ -1,0 +1,69 @@
+{
+  "run_id": "full-2026-10-20",
+  "source": "spotify_reviews_18months.csv",
+  "source_sha256": "1fc85de68a304dd8978b537cfa58793d5f41cbaf417fa32cb53899f83a2fcef6",
+  "rows": 660622,
+  "completed": 660609,
+  "quarantined_empty_text": 13,
+  "distinct_texts_sent": 484189,
+  "exact_text_cache_copies": 176420,
+  "model": "jev-1.13.0",
+  "label_config": "jev-1.13.0|enrich-v5|schema-v3",
+  "batch_size": 20,
+  "workers": 4,
+  "enrich_sessions": [
+    {
+      "phase": "initial",
+      "stop_reason": "interrupted",
+      "requests": 22997,
+      "attempts": 23008,
+      "failed_attempts": 11,
+      "completed_new": 459940,
+      "cache_copies": 176420,
+      "input_tokens": 197841610,
+      "output_tokens": 95152717,
+      "wall_seconds": 1561.077,
+      "time": "2026-10-20T16:09:06"
+    },
+    {
+      "phase": "resume",
+      "stop_reason": "finished",
+      "requests": 1213,
+      "attempts": 1213,
+      "failed_attempts": 0,
+      "completed_new": 24249,
+      "cache_copies": 0,
+      "input_tokens": 10496825,
+      "output_tokens": 5019273,
+      "wall_seconds": 92.172,
+      "time": "2026-10-20T16:17:09"
+    }
+  ],
+  "final_session_stage_seconds": {
+    "enrich": 126.268,
+    "group": 7.254,
+    "memo": 5.144,
+    "rank": 5.691,
+    "verify": 331.243
+  },
+  "final_session_wall_seconds": 475.606,
+  "enrich_wall_seconds_total": 1653.2,
+  "verify": {
+    "sample": 1000,
+    "agreement": {
+      "topic": 0.801,
+      "intent": 0.863,
+      "severity": 0.702,
+      "all_three": 0.495
+    },
+    "planted_error": "caught"
+  },
+  "api_spend_usd_all_runs_ledger": 8.96539287,
+  "spend_cap_usd": 10.0,
+  "spend_note": "Ledger total covers every paid run: 3 pilots, 500, 10,000 and the full run. Jev bills input tokens at $0.042/M; output tokens are reported but billed at $0 (docs.typesafe.ai/models).",
+  "resume": {
+    "checkpoint_before_completed": 636360,
+    "checkpoint_after_completed": 660609,
+    "resume_requests": 1213
+  }
+}

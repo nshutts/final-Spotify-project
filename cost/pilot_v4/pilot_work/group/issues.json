@@ -1,0 +1,137 @@
+{
+  "ISS-ACCESS": {
+    "issue_id": "ISS-ACCESS",
+    "topic": "access",
+    "input_hash": "8117f860f93923dae62d89af1687373d9c588c9ef743db8e7c9bae8b09ce8448",
+    "prompt_version": "group-v1",
+    "evidence_review_ids": [
+      "32fb340f-4f9f-4551-8dae-755221e58d6a",
+      "de0a9cdf-8974-48bc-802f-331228df4619"
+    ],
+    "name": "login or sign-in failures",
+    "name_probability": 0.98,
+    "member_count": 2,
+    "model": "jev-1.13.0"
+  },
+  "ISS-USABILITY": {
+    "issue_id": "ISS-USABILITY",
+    "topic": "usability",
+    "input_hash": "3cc84a18a41361bf21649ff57d79e9d627e27c3ac74fa7a5fd5b3e70a947b885",
+    "prompt_version": "group-v1",
+    "evidence_review_ids": [
+      "45c561b9-cc47-4d80-95d3-f0d20bc84af3",
+      "9e5f9745-f8be-48d3-b9de-4d118507d94a",
+      "e5e6c55f-3069-4b7c-9807-f8b5d5bf2726",
+      "7084ced1-0428-4093-9328-442f74719b4f",
+      "a3605554-5c3a-441d-836e-e9fdea83eb2e",
+      "e16a4550-43e7-4ae1-b538-a65cc652c31b",
+      "035213ba-b1b9-411c-b028-70296e5f0e73",
+      "5c9c17d3-9d6a-4fa1-a2a4-ae98eefbbd25",
+      "618d1dbb-0186-4537-923a-7b4dabf19afb",
+      "85383985-844d-4f9b-bcd9-d6016ac35f6b",
+      "89a8e180-7846-4421-a2b6-fa7787e9d0d2",
+      "89ea2c30-db8b-459d-8ab7-bbcb7f92c774",
+      "94c9f2f9-36fa-4c11-936e-660514fe7a35",
+      "9c9757da-6b99-4c95-a0e7-0661ee858027",
+      "ab67a772-c3b7-42ba-9b80-8d21d3857018",
+      "c2738a4f-e57c-46bc-a4ad-8ec5a4b5d5cd",
+      "cf6166ae-d71a-4839-9add-088645ad3b78",
+      "d455c11e-c530-4c03-a395-38f5a5cdb8d3",
+      "ebc64fe2-9553-4528-87d5-cb4bb9783be6"
+    ],
+    "name": "too many or intrusive ads",
+    "name_probability": 0.8,
+    "member_count": 19,
+    "model": "jev-1.13.0"
+  },
+  "ISS-PLAYBACK": {
+    "issue_id": "ISS-PLAYBACK",
+    "topic": "playback",
+    "input_hash": "62c3148b670794c87b59ac45ae13d3965a6a68d4e306db0ef879d3605c8b8b0b",
+    "prompt_version": "group-v1",
+    "evidence_review_ids": [
+      "46ff0c74-5e86-4e5b-b4cd-36201aab0f9e",
+      "4ab2089a-ffa8-49e7-a8a3-aeb583a96796",
+      "55cc3abf-c295-4591-8c3a-78085cfdefaa",
+      "66a29b3c-c14d-440e-b722-b23e0c99ae82",
+      "6c257eba-3dca-49f6-b7f0-4c4484d81e26"
+    ],
+    "name": "mixed playback problems",
+    "name_probability": 0.74,
+    "member_count": 5,
+    "model": "jev-1.13.0"
+  },
+  "ISS-DOWNLOADS": {
+    "issue_id": "ISS-DOWNLOADS",
+    "topic": "downloads",
+    "input_hash": "33af9eb5e1fa334bc5a3ae4a2523e9579deb363f9ce77d9ba4299d7549222402",
+    "prompt_version": "group-v1",
+    "evidence_review_ids": [
+      "dcff57c6-abd6-413b-b255-aec3dc34fcbd",
+      "2ffdf599-a0d5-4c01-bf26-025215d44c06"
+    ],
+    "name": "offline mode not working",
+    "name_probability": 0.49,
+    "member_count": 2,
+    "model": "jev-1.13.0"
+  },
+  "ISS-CATALOG": {
+    "issue_id": "ISS-CATALOG",
+    "topic": "catalog",
+    "input_hash": "5f5038a2cf03437c3355ad5671c61854f6646b0137bace73218a24172a622b29",
+    "prompt_version": "group-v1",
+    "evidence_review_ids": [
+      "0658feaa-5bec-416e-b6b0-3de2a4c14580",
+      "1807cc68-ba99-4edc-b6f1-2a1478e69109",
+      "47becad0-8ae5-4a10-9731-fde8f2091862",
+      "e0127547-4edd-44a0-8d5e-e8398bc07086",
+      "a1a28752-3256-4f81-b888-3e943343529f"
+    ],
+    "name": "songs or artists missing or removed",
+    "name_probability": 0.44,
+    "member_count": 5,
+    "model": "jev-1.13.0"
+  },
+  "ISS-BILLING": {
+    "issue_id": "ISS-BILLING",
+    "topic": "billing",
+    "input_hash": "bb7ed44b14921013604f7723f95934e4ecec4a997c1494685773f56d68c9cd60",
+    "prompt_version": "group-v1",
+    "evidence_review_ids": [
+      "a78d831a-69f4-428a-9235-cfdd9775c509",
+      "ad730d1a-829a-4dc4-9561-7e1cd07e2c30",
+      "21915fcd-9a35-48ba-b277-6296c4154603",
+      "d146397f-4a94-4980-be00-ae9212eca3a7",
+      "3e82cf28-6b0a-4980-902c-b6aa154d353a",
+      "88439ec2-7c49-4c57-bedb-c5e098692aff"
+    ],
+    "name": "basic features locked behind Premium",
+    "name_probability": 1.0,
+    "member_count": 6,
+    "model": "jev-1.13.0"
+  },
+  "ISS-OTHER": {
+    "issue_id": "ISS-OTHER",
+    "topic": "other",
+    "input_hash": "41a0b04a30e15f49676135fecb66d065323ce15f87a88d0970acab26d4a25712",
+    "prompt_version": "group-v1",
+    "evidence_review_ids": [
+      "8b6e028a-5f63-4011-9841-cbbade4830eb",
+      "b47c203f-366e-4409-922d-cd52aa8bbef6",
+      "c1ab120a-f91f-4ee3-87f5-66f352e2d47f",
+      "06a45bd5-3ed9-43af-b7f2-8b9487e2ffff",
+      "178c3b49-b689-4fe4-92a2-2257a58e6d95",
+      "33526c6f-7a49-4b3d-bd20-d1bc191c494c",
+      "486d1d7a-d6f6-41ea-81ad-ed875452729c",
+      "51bfd887-24a0-4741-8b59-68e0a726dd7a",
+      "b92a7381-b5cd-4c77-9176-e5c4b4818c8a",
+      "ca16e65d-d2ff-4453-a495-b8c422809330",
+      "2d5cdd20-3094-40a5-bc6e-653302b59b56",
+      "b9a3e661-0eac-4cc9-a30e-7b1e11ef1315"
+    ],
+    "name": "general dissatisfaction with the app",
+    "name_probability": 0.98,
+    "member_count": 12,
+    "model": "jev-1.13.0"
+  }
+}

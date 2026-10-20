@@ -1,0 +1,28 @@
+{
+  "prompt_version": "verify-v1",
+  "seed": 20261019,
+  "declared_sample_size": 20,
+  "verified": 20,
+  "new_calls_this_run": 0,
+  "agreement": {
+    "topic": 0.95,
+    "intent": 0.9,
+    "severity": 0.8,
+    "all_three": 0.65
+  },
+  "agreement_counts": {
+    "topic": 19,
+    "intent": 18,
+    "severity": 16,
+    "all_three": 13
+  },
+  "disagreement_rows": 7,
+  "planted_error_test": {
+    "status": "caught",
+    "synthetic": true,
+    "review_id": "035213ba-b1b9-411c-b028-70296e5f0e73",
+    "true_enrich_topic": "usability",
+    "planted_topic": "access",
+    "note": "Test copy only; the planted label is never written to results or aggregates."
+  }
+}
