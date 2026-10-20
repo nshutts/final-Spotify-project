@@ -33,6 +33,7 @@ from pipeline import enrich, group, memo, prepare, rank, verify  # noqa: E402
 from pipeline.common import SpendLedger, load_input_rate, log_event, read_jsonl, write_json  # noqa: E402
 
 LEDGER = ROOT / "runs" / "spend_ledger.json"
+DOWNSTREAM_RESERVE_USD = 0.10   # kept back from enrichment for verify, group and memo
 
 
 def make_client(args):
@@ -68,8 +69,14 @@ def cmd_enrich(args, client=None, rate=None, ledger=None):
     stop = enrich.StopFlag()
     stop.install()
     max_seconds = args.max_hours * 3600 if args.max_hours else None
-    s = enrich.run(args.work, args.csv, client, ledger, rate, workers=args.workers, limit=args.limit,
-                   max_seconds=max_seconds, stop=stop, batch_size=args.batch_size)
+    # Hold back money for the downstream stages so enrichment can never starve them.
+    full_cap = ledger.cap
+    ledger.cap = max(full_cap - DOWNSTREAM_RESERVE_USD, 0.0)
+    try:
+        s = enrich.run(args.work, args.csv, client, ledger, rate, workers=args.workers, limit=args.limit,
+                       max_seconds=max_seconds, stop=stop, batch_size=args.batch_size)
+    finally:
+        ledger.cap = full_cap
     print(json.dumps(s, indent=2))
     return s
 
@@ -109,7 +116,10 @@ def cmd_all(args):
     t = time.time()
     s = cmd_enrich(args, client, rate, ledger)
     stages["enrich"] = round(time.time() - t, 3)
-    if s["stop_reason"] not in ("finished",):
+    if s["stop_reason"] == "spend_cap_reached":
+        print("Enrichment reached the spend cap. Continuing with the reviews completed so far; the rest "
+              "will be exported as not classified.")
+    elif s["stop_reason"] != "finished":
         print(f"Enrichment stopped ({s['stop_reason']}). Rerun the same command to resume; later stages wait.")
         return
     for name, fn in (("verify", cmd_verify), ("group", cmd_group)):
