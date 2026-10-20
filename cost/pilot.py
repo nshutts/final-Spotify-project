@@ -175,7 +175,8 @@ def build_report(rates_path=COST / "rates.csv", assumptions_path=COST / "assumpt
           f"- Enrichment throughput (1 worker): {1 / lat if lat else 0:.2f} requests/s; mean {per_enrich_call_tokens:.1f} "
           "billed input tokens per enrich request.",
           "- Output tokens are billed at $0 by Jev. Local compute (a laptop running Python) is not priced: **unknown, not zero**.",
-          f"- Rates: {', '.join(f'{k[0]} {k[1]} ${v['price']}/M as of {v['as_of']} ({v['source_url']})' for k, v in rates.items())}.",
+          "- Rates: " + ", ".join("{} {} ${}/M as of {} ({})".format(k[0], k[1], v["price"], v["as_of"], v["source_url"])
+                                  for k, v in rates.items()) + ".",
           "", "## Full-run projection (estimates, not measurements)", ""]
     budget = Decimal(str(a["budget_usd"]))
     L += [f"Budget (editable in `assumptions.json`): **${budget}** total API spend. Max workers {a['max_workers']}; "

@@ -4,7 +4,7 @@
 
 Every model role in this project uses Jev (TypeSafe), model `jev-1.13.0`. You need one key: `TYPESAFE_API_KEY`. The other variables in `.env.example` are unused.
 
-1. Install dependencies (Python 3.10+):
+1. Install dependencies (Python 3.9+; tested on 3.9 and 3.13):
    ```
    python -m venv .venv
    source .venv/bin/activate        # Windows: .venv\Scripts\activate
