@@ -47,7 +47,7 @@ class JevClient:
         Raises JevError (with .attempts) when every attempt fails.
         """
         body = json.dumps({"model": self.model, "state": state, "questions": questions},
-                          ensure_ascii=False).encode("utf-8")
+                          ensure_ascii=False, separators=(",", ":")).encode("utf-8")
         attempts = []
         for attempt in range(1, self.max_retries + 2):
             local_id = "local-" + uuid.uuid4().hex

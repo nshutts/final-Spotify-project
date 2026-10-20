@@ -213,7 +213,9 @@ def run(work_dir, source_csv, client, ledger, rate, workers=1, limit=None, max_s
         if rec and not rec.get("cache_source_id"):
             write_cache_copies(rec)
 
+    # Texts shared by the most reviews go first, so a run stopped by the spend cap covers the most reviews.
     originals = [i["review_id"] for i in pending if i["is_first_of_text"]]
+    originals.sort(key=lambda rid: -len(by_key[item_by_id[rid]["text_key"]]))
     units = []
     for rid in originals:
         if rid in done:
