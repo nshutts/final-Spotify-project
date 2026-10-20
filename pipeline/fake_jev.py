@@ -32,10 +32,11 @@ class FakeJevClient:
             raise JevError("simulated HTTP 503", status=503, retryable=True,
                            attempts=[{"request_id": rid, "attempt": 1, "outcome": "failed", "status": 503,
                                       "seconds": 0.0}])
-        text = state if isinstance(state, str) else str(state)
-        low = text.lower()
         answers = {}
         for name, q in questions.items():
+            sub = name.split("_", 1)[0]
+            text = state.get(sub, str(state)) if isinstance(state, dict) else str(state)
+            low = text.lower()
             if q["type"] == "choice":
                 opts = list(q["criteria"])
                 pick = opts[0]
@@ -59,7 +60,7 @@ class FakeJevClient:
         if self.malformed_every and self.calls % self.malformed_every == 0:
             answers.pop(next(iter(answers)))
         payload = {"model": SIM_MODEL, "answers": answers,
-                   "usage": {"input_tokens": len(str(questions)) // 4 + len(text) // 4, "output_tokens": 0}}
+                   "usage": {"input_tokens": 400 + len(str(questions)) // 5 + len(str(state)) // 4, "output_tokens": 0}}
         return payload, [{"request_id": rid, "attempt": 1, "outcome": "succeeded", "status": 200, "seconds": 0.0}]
 
     choose = ask

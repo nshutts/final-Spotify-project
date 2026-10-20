@@ -64,7 +64,7 @@ class PipelineTests(unittest.TestCase):
 
     def test_full_enrich_and_cache_provenance(self):
         s = self.run_enrich(FakeJevClient())
-        self.assertEqual(s["requests"], 8)
+        self.assertEqual(s["requests"], 1)   # 8 distinct texts fit in one batch of 20
         recs = latest(self.work)
         self.assertEqual(len(recs), 9)
         copy = recs["id-002"]
@@ -74,17 +74,29 @@ class PipelineTests(unittest.TestCase):
             self.assertIn(r["evidence_quote"], TEXTS[int(r["review_id"][3:])])
 
     def test_malformed_output_retried_once_then_quarantined(self):
+        # Every reply drops one answer: in the batch only that review is invalid; its solo retry is
+        # malformed too, so exactly one review is quarantined and the rest of the batch survives.
         s = self.run_enrich(FakeJevClient(malformed_every=1))
-        self.assertEqual(s["quarantined"], 8)
+        self.assertEqual(s["quarantined"], 1)
+        self.assertEqual(s["completed_new"], 7)
         q = [r for r in latest(self.work).values() if r["status"] == "quarantined"]
         self.assertTrue(all(r["reason"].startswith("invalid_output") and r["attempts"] == 2 for r in q))
 
+    def test_batches_respect_size_and_log_all_ids(self):
+        self.run_enrich(FakeJevClient(), batch_size=3)
+        calls = [c for c in read_jsonl(self.work / "calls.jsonl") if c["role"] == "enrich"]
+        self.assertEqual([len(c["review_ids"]) for c in calls], [3, 3, 2])
+
+    def test_one_bad_answer_does_not_lose_the_batch(self):
+        s = self.run_enrich(FakeJevClient(malformed_every=2))
+        self.assertGreaterEqual(s["completed_new"], 7)
+
     def test_api_failure_quarantines_then_resume_retries_it(self):
-        s1 = self.run_enrich(FakeJevClient(fail_every=3))
+        s1 = self.run_enrich(FakeJevClient(fail_every=2), batch_size=3)
         self.assertGreater(s1["quarantined"], 0)
         s2 = self.run_enrich(FakeJevClient())
         self.assertEqual(s2["phase"], "resume")
-        self.assertEqual(s2["requests"], s1["quarantined"])
+        self.assertEqual(s2["completed_new"], s1["quarantined"])
         self.assertTrue(all(r["status"] == "completed" for r in latest(self.work).values()))
 
     def test_spend_cap_stops_before_dispatch(self):
@@ -93,14 +105,14 @@ class PipelineTests(unittest.TestCase):
         self.assertEqual(s["stop_reason"], "spend_cap_reached")
 
     def test_interrupt_and_resume_never_resends_completed(self):
-        s1 = self.run_enrich(FakeJevClient(), limit=3)
+        s1 = self.run_enrich(FakeJevClient(), limit=3, batch_size=2)
         self.assertEqual(s1["stop_reason"], "limit_reached")
         before = {r for r, v in latest(self.work).items() if v["status"] == "completed"}
         s2 = self.run_enrich(FakeJevClient())
         calls = list(read_jsonl(self.work / "calls.jsonl"))
         resumed = {c["review_ids"][0] for c in calls if c["phase"] == "resume"}
         self.assertFalse(before & resumed)
-        self.assertEqual(s1["requests"] + s2["requests"], 8)
+        self.assertEqual(s1["completed_new"] + s2["completed_new"], 8)
 
     def test_injection_text_is_labelled_as_data(self):
         self.run_enrich(FakeJevClient())

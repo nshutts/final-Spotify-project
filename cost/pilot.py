@@ -49,7 +49,7 @@ def run_pilot(csv_path, verify_sample=20):
     rate = load_input_rate(client.model)
     ledger = SpendLedger(10.0, ROOT / "runs" / "spend_ledger.json")
     meas = {"input_csv": str(csv_path), "input_sha256": file_sha(csv_path), "provider": "TypeSafe Jev",
-            "model": client.model, "workers": 1, "reviews_per_request": 1, "verify_sample": verify_sample,
+            "model": client.model, "workers": 1, "reviews_per_request": 20, "verify_sample": verify_sample,
             "runs": {}}
 
     def calls_count():
@@ -142,6 +142,8 @@ def build_report(rates_path=COST / "rates.csv", assumptions_path=COST / "assumpt
 
     enr_calls, enr_ok, enr_tin = stage_tokens("enrich")
     per_enrich_call_tokens = Decimal(enr_tin) / Decimal(max(enr_ok, 1))
+    # Projection unit is one distinct text: billed enrich tokens per labelled original.
+    per_text_tokens = Decimal(enr_tin) / Decimal(max(rc["enrich"]["completed_new"] + rc["enrich"]["quarantined"], 1))
     in_rate = rates[(meas["model"], "uncached_input")]["price"] / Decimal(1_000_000)
     lat = rc["stage_seconds"]["enrich"] / max(rc["enrich"]["requests"], 1)
 
@@ -172,8 +174,9 @@ def build_report(rates_path=COST / "rates.csv", assumptions_path=COST / "assumpt
     per1000 = money(total_cold / Decimal(n_rows) * 1000) if n_rows else 0
     per_rec = money(total_cold / Decimal(max(completed, 1)))
     L += ["", f"- Cold API total: **${c_cost['api_total']}**; per 1,000 input rows ${per1000}; per completed record ${per_rec}.",
-          f"- Enrichment throughput (1 worker): {1 / lat if lat else 0:.2f} requests/s; mean {per_enrich_call_tokens:.1f} "
-          "billed input tokens per enrich request.",
+          f"- Enrichment throughput (1 worker): {1 / lat if lat else 0:.2f} requests/s; {per_text_tokens:.1f} billed input "
+          f"tokens per distinct text; mean {per_enrich_call_tokens:.1f} "
+          "billed input tokens per enrich request (" + str(meas["reviews_per_request"]) + " reviews per request).",
           "- Output tokens are billed at $0 by Jev. Local compute (a laptop running Python) is not priced: **unknown, not zero**.",
           "- Rates: " + ", ".join("{} {} ${}/M as of {} ({})".format(k[0], k[1], v["price"], v["as_of"], v["source_url"])
                                   for k, v in rates.items()) + ".",
@@ -182,7 +185,7 @@ def build_report(rates_path=COST / "rates.csv", assumptions_path=COST / "assumpt
     L += [f"Budget (editable in `assumptions.json`): **${budget}** total API spend. Max workers {a['max_workers']}; "
           f"fallback fraction {a['fallback_fraction']} (no stronger-model fallback is used); output-token cap: not applicable "
           "(Jev returns fixed-size structured answers, output billed at $0).", "",
-          "| Scenario | Enrich requests | Retry rate | Verify | Enrich cost | Other stages | Total | Hours at workers | Over budget? |",
+          "| Scenario | Distinct texts | Retry rate | Verify | Enrich cost | Other stages | Total | Hours at workers | Over budget? |",
           "|---|---|---|---|---|---|---|---|---|"]
     other_cold = sum(Decimal(info["items"]["uncached_input"]["cost"]) for st, info in c_cost["stages"].items()
                      if st != "enrich" and info["items"].get("uncached_input"))
@@ -190,11 +193,12 @@ def build_report(rates_path=COST / "rates.csv", assumptions_path=COST / "assumpt
     per_verify = Decimal(vtin) / Decimal(max(vcalls, 1))
     for name, sc in a["scenarios"].items():
         req = Decimal(sc["enrich_requests"]) * (1 + Decimal(str(sc["retry_rate"])))
-        enrich_cost = money(req * per_enrich_call_tokens * in_rate)
+        enrich_cost = money(req * per_text_tokens * in_rate)
         verify_cost = Decimal(sc["verify_sample"]) * per_verify * in_rate
         other = money(verify_cost + other_cold * Decimal(str(sc.get("downstream_multiplier", 1))))
         total = money(enrich_cost + other)
-        hours = float(req) * lat / (a["max_workers"] * sc["worker_efficiency"]) / 3600
+        lat_text = rc["stage_seconds"]["enrich"] / max(rc["enrich"]["completed_new"] + rc["enrich"]["quarantined"], 1)
+        hours = float(req) * lat_text / (a["max_workers"] * sc["worker_efficiency"]) / 3600
         L.append(f"| {name} | {int(req):,} | {sc['retry_rate']} | {sc['verify_sample']} | ${enrich_cost} | ${other} | "
                  f"**${total}** | {hours:.1f} h at {a['max_workers']} | {'**YES: over budget**' if total > budget else 'no'} |")
     L += ["", "Projection method: measured billed tokens per enrich request x projected requests x rate; verify scaled "

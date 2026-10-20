@@ -60,6 +60,8 @@ def cmd_prepare(args):
 
 
 def cmd_enrich(args, client=None, rate=None, ledger=None):
+    if not 1 <= args.batch_size <= 50:
+        sys.exit("--batch-size must be between 1 and 50")
     if client is None:
         client, rate = make_client(args)
         ledger = ledger_for(args)
@@ -67,7 +69,7 @@ def cmd_enrich(args, client=None, rate=None, ledger=None):
     stop.install()
     max_seconds = args.max_hours * 3600 if args.max_hours else None
     s = enrich.run(args.work, args.csv, client, ledger, rate, workers=args.workers, limit=args.limit,
-                   max_seconds=max_seconds, stop=stop)
+                   max_seconds=max_seconds, stop=stop, batch_size=args.batch_size)
     print(json.dumps(s, indent=2))
     return s
 
@@ -168,6 +170,7 @@ def main(argv=None):
     for name in ("enrich", "all"):
         q = add(name, csv=True, paid=True)
         q.add_argument("--workers", type=int, default=1)
+        q.add_argument("--batch-size", type=int, default=20, help="reviews per enrich request (max 50)")
         q.add_argument("--limit", type=int, default=None, help="max distinct texts to send this session")
         q.add_argument("--max-hours", type=float, default=None)
         q.add_argument("--sample", type=int, default=1000, help="verification sample size")

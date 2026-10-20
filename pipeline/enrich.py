@@ -63,15 +63,19 @@ def entities_for(text):
 
 
 def parse_answers(payload, text):
-    """Map one Jev reply to contract fields. Raises ValueError on anything invalid or refused."""
+    """Map a single-review Jev reply to contract fields. Raises ValueError if invalid or refused."""
     if not isinstance(payload, dict) or payload.get("refusal"):
         raise ValueError("refused or empty response")
     answers = payload.get("answers")
     if not isinstance(answers, dict):
         raise ValueError("missing answers")
+    return parse_one(answers, text, "")
 
+
+def parse_one(answers, text, prefix):
+    """Validate the four answers for one review (keys prefixed, e.g. 'r3_topic') and map to the schema."""
     def ans(name, kind):
-        a = answers.get(name)
+        a = answers.get(prefix + name)
         if not isinstance(a, dict) or a.get("type") != kind:
             raise ValueError(f"missing or wrong-type answer: {name}")
         return a
@@ -90,8 +94,7 @@ def parse_answers(payload, text):
         raise ValueError("sentiment score outside 0-4")
 
     def top_prob(a, choice):
-        probs = a.get("probabilities") or {}
-        p = probs.get(choice)
+        p = (a.get("probabilities") or {}).get(choice)
         return float(p) if isinstance(p, (int, float)) else None
 
     p_topic, p_intent = top_prob(topic_a, topic), top_prob(intent_a, intent)
@@ -108,9 +111,24 @@ def parse_answers(payload, text):
     }
 
 
-def reservation_usd(text, rate):
-    """Worst-case cost of one call: generous token estimate (state counted once per question)."""
-    tokens = (QUESTIONS_CHARS + 4 * len(text)) / 2 + 200
+def batch_request(texts_in_order):
+    """State and questions for several reviews in one request. Keys r1..rN keep tokens low; each
+    question names the review it is about. Returns (state, questions, prefixes)."""
+    state, questions, prefixes = {}, {}, []
+    for i, text in enumerate(texts_in_order, 1):
+        key = f"r{i}"
+        state[key] = text
+        prefixes.append(key + "_")
+        for name, q in ENRICH_QUESTIONS.items():
+            qq = dict(q)
+            qq["instructions"] = f"Review {key}: {q['instructions']}"
+            questions[f"{key}_{name}"] = qq
+    return state, questions, prefixes
+
+
+def reservation_usd(texts_batch, rate):
+    """Worst-case cost of one request: generous token estimate (about 2x the pilot measurement)."""
+    tokens = 800 + sum(QUESTIONS_CHARS / 2 + 120 + len(t) for t in texts_batch)
     return tokens * rate
 
 
@@ -171,7 +189,7 @@ def snapshot(work_dir, name, config=None):
 
 
 def run(work_dir, source_csv, client, ledger, rate, workers=1, limit=None, max_seconds=None,
-        stop=None, log=print, progress_every=30):
+        stop=None, log=print, progress_every=30, batch_size=20):
     """Enrich every pending distinct text. Safe to re-run: completed work is never re-sent."""
     work = Path(work_dir)
     config = label_config(client.model)
@@ -189,7 +207,7 @@ def run(work_dir, source_csv, client, ledger, rate, workers=1, limit=None, max_s
 
     results = JsonlWriter(results_path)
     calls = JsonlWriter(calls_path, sync_every=200)
-    summary = {"phase": phase, "label_config": config, "workers": workers, "requests": 0, "attempts": 0,
+    summary = {"phase": phase, "label_config": config, "workers": workers, "batch_size": batch_size, "requests": 0, "attempts": 0,
                "failed_attempts": 0, "completed_new": 0, "cache_copies": 0, "quarantined": 0,
                "invalid_retries": 0, "input_tokens": 0, "output_tokens": 0, "skipped_done": 0,
                "stop_reason": None}
@@ -223,35 +241,66 @@ def run(work_dir, source_csv, client, ledger, rate, workers=1, limit=None, max_s
         elif rid not in hard_q:
             units.append(rid)
 
-    def work_one(rid):
+    def single(rid, events):
+        """One review alone (used to retry a review whose batch answer was invalid)."""
         text = texts[rid]
-        events, cost_tokens, reason, record = [], 0, None, None
-        for attempt_no in range(MAX_INVALID_RETRIES + 1):
+        try:
+            payload, attempts = client.ask(text, ENRICH_QUESTIONS)
+        except JevError as e:
+            events.extend({**a, "review_ids": [rid], "input_tokens": 0, "output_tokens": 0} for a in e.attempts)
+            return None, f"api_error: {e}", 0
+        usage = payload.get("usage") or {}
+        tin, tout = int(usage.get("input_tokens") or 0), int(usage.get("output_tokens") or 0)
+        events.extend({**a, "review_ids": [rid], "input_tokens": 0, "output_tokens": 0} for a in attempts[:-1])
+        last = {**attempts[-1], "review_ids": [rid], "input_tokens": tin, "output_tokens": tout,
+                "usage_reported": bool(usage)}
+        try:
+            rec = parse_answers(payload, text)
+            rec["model"] = payload.get("model") or client.model
+            events.append(last)
+            return rec, None, tin
+        except ValueError as e:
+            events.append({**last, "outcome": "failed", "error": f"invalid_output: {e}"})
+            return None, f"invalid_output: {e}", tin
+
+    def work_batch(rids):
+        """Send up to batch_size reviews in one request. Each review is validated on its own; an invalid
+        answer is retried once alone, then quarantined. Returns (outcomes, events, billed_tokens)."""
+        events, tokens, outcomes = [], 0, {}
+        state, questions, prefixes = batch_request([texts[r] for r in rids])
+        try:
+            payload, attempts = client.ask(state, questions)
+        except JevError as e:
+            events.extend({**a, "review_ids": list(rids), "input_tokens": 0, "output_tokens": 0} for a in e.attempts)
+            return {r: (None, f"api_error: {e}", len(e.attempts)) for r in rids}, events, 0
+        usage = payload.get("usage") or {}
+        tin, tout = int(usage.get("input_tokens") or 0), int(usage.get("output_tokens") or 0)
+        tokens += tin
+        events.extend({**a, "review_ids": list(rids), "input_tokens": 0, "output_tokens": 0} for a in attempts[:-1])
+        answers = payload.get("answers") if isinstance(payload, dict) else None
+        retry = []
+        for rid, prefix in zip(rids, prefixes):
             try:
-                payload, attempts = client.ask(text, ENRICH_QUESTIONS)
-            except JevError as e:
-                for a in e.attempts:
-                    events.append({**a, "input_tokens": 0, "output_tokens": 0})
-                return None, f"api_error: {e}", events, cost_tokens, attempt_no
-            usage = payload.get("usage") or {}
-            in_tok, out_tok = int(usage.get("input_tokens") or 0), int(usage.get("output_tokens") or 0)
-            cost_tokens += in_tok
-            for a in attempts[:-1]:
-                events.append({**a, "input_tokens": 0, "output_tokens": 0})
-            last = dict(attempts[-1])
-            try:
-                record = parse_answers(payload, text)
-                record["model"] = payload.get("model") or client.model
-                events.append({**last, "input_tokens": in_tok, "output_tokens": out_tok,
-                               "usage_reported": bool(usage)})
-                return record, None, events, cost_tokens, attempt_no
+                if not isinstance(answers, dict) or payload.get("refusal"):
+                    raise ValueError("refused or missing answers")
+                rec = parse_one(answers, texts[rid], prefix)
+                rec["model"] = payload.get("model") or client.model
+                outcomes[rid] = (rec, None, 1)
             except ValueError as e:
-                reason = f"invalid_output: {e}"
-                last["outcome"] = "failed"
-                last["error"] = reason
-                events.append({**last, "input_tokens": in_tok, "output_tokens": out_tok,
-                               "usage_reported": bool(usage)})
-        return None, reason, events, cost_tokens, MAX_INVALID_RETRIES + 1
+                retry.append((rid, str(e)))
+        ok_ids = [r for r in rids if r in outcomes]
+        last = {**attempts[-1], "input_tokens": tin, "output_tokens": tout, "usage_reported": bool(usage)}
+        if ok_ids:
+            events.append({**last, "review_ids": list(rids), "outcome": "succeeded",
+                           "invalid_in_batch": [r for r, _ in retry]})
+        else:
+            events.append({**last, "review_ids": list(rids), "outcome": "failed",
+                           "error": "invalid_output for every review in the batch"})
+        for rid, why in retry:          # one retry, alone
+            rec, reason, t = single(rid, events)
+            tokens += t
+            outcomes[rid] = (rec, reason, 2) if rec else (None, reason or f"invalid_output: {why}", 2)
+        return outcomes, events, tokens
 
     started = time.time()
     last_progress = started
@@ -260,7 +309,8 @@ def run(work_dir, source_csv, client, ledger, rate, workers=1, limit=None, max_s
     log(f"enrich: {len(units)} distinct texts to label, {len(done)} reviews already completed "
         f"(phase={phase}, workers={workers}, cap=${ledger.cap:.2f}, spent so far=${ledger.spent:.4f})")
 
-    unit_iter = iter(units)
+    batches = [units[i:i + batch_size] for i in range(0, len(units), batch_size)]
+    batch_iter = iter(batches)
     inflight = {}
     dispatched = 0
     with ThreadPoolExecutor(max_workers=workers) as pool:
@@ -272,62 +322,68 @@ def run(work_dir, source_csv, client, ledger, rate, workers=1, limit=None, max_s
                 if max_seconds is not None and time.time() - started > max_seconds:
                     stop.set("time_cap_reached")
                     break
-                rid = next(unit_iter, None)
-                if rid is None:
+                batch = next(batch_iter, None)
+                if batch is None:
                     break
-                est = reservation_usd(texts[rid], rate)
+                if limit is not None:
+                    batch = batch[:max(limit - dispatched, 0)]
+                est = reservation_usd([texts[r] for r in batch], rate)
                 if not ledger.try_reserve(est):
                     stop.set("spend_cap_reached")
-                    log(f"spend cap: next call would pass ${ledger.cap:.2f}; stopping cleanly")
+                    log(f"spend cap: next request would pass ${ledger.cap:.2f}; stopping cleanly")
                     break
-                inflight[pool.submit(work_one, rid)] = (rid, est)
-                dispatched += 1
+                inflight[pool.submit(work_batch, batch)] = (batch, est)
+                dispatched += len(batch)
             if not inflight:
                 break
             finished, _ = wait(list(inflight), return_when=FIRST_COMPLETED, timeout=5)
             for fut in finished:
-                rid, est = inflight.pop(fut)
-                record, reason, events, tokens, retries = fut.result()
+                batch, est = inflight.pop(fut)
+                outcomes, events, tokens = fut.result()
                 ledger.settle(est, tokens * rate)
                 summary["requests"] += 1
-                summary["invalid_retries"] += min(retries, MAX_INVALID_RETRIES) if record else 0
+                model_used = next((o[0]["model"] for o in outcomes.values() if o[0]), client.model)
                 for ev in events:
                     summary["attempts"] += 1
                     summary["failed_attempts"] += ev["outcome"] == "failed"
                     summary["input_tokens"] += ev["input_tokens"]
                     summary["output_tokens"] += ev["output_tokens"]
-                    calls.write({"request_id": ev["request_id"], "role": "enrich", "review_ids": [rid],
-                                 "model": (record or {}).get("model", client.model), "phase": phase,
-                                 "outcome": ev["outcome"], "label_config": config,
-                                 "input_tokens": ev["input_tokens"], "output_tokens": ev["output_tokens"],
-                                 "attempt": ev["attempt"], "http_status": ev.get("status"),
-                                 "seconds": ev["seconds"], "error": ev.get("error"),
+                    calls.write({"request_id": ev["request_id"], "role": "enrich", "review_ids": ev["review_ids"],
+                                 "model": model_used, "phase": phase, "outcome": ev["outcome"],
+                                 "label_config": config, "input_tokens": ev["input_tokens"],
+                                 "output_tokens": ev["output_tokens"], "attempt": ev["attempt"],
+                                 "http_status": ev.get("status"), "seconds": ev["seconds"],
+                                 "error": ev.get("error"), "invalid_in_batch": ev.get("invalid_in_batch") or None,
                                  "usage_reported": ev.get("usage_reported", False)})
-                item = item_by_id[rid]
-                if record is None:
-                    results.write({"review_id": rid, "source_sha256": item["source_sha256"],
-                                   "status": "quarantined", "reason": reason, "attempts": len(events),
-                                   "label_config": config, "text_key": item["text_key"]})
-                    summary["quarantined"] += 1
-                    continue
-                rec = {"review_id": rid, "source_sha256": item["source_sha256"], "status": "completed",
-                       "label_config": config, "text_key": item["text_key"], **record}
-                results.write(rec)
-                done.add(rid)
-                summary["completed_new"] += 1
-                write_cache_copies(rec)
+                for rid in batch:
+                    record, reason, n_attempts = outcomes[rid]
+                    item = item_by_id[rid]
+                    if n_attempts == 2 and record:
+                        summary["invalid_retries"] += 1
+                    if record is None:
+                        results.write({"review_id": rid, "source_sha256": item["source_sha256"],
+                                       "status": "quarantined", "reason": reason, "attempts": n_attempts,
+                                       "label_config": config, "text_key": item["text_key"]})
+                        summary["quarantined"] += 1
+                        continue
+                    rec = {"review_id": rid, "source_sha256": item["source_sha256"], "status": "completed",
+                           "label_config": config, "text_key": item["text_key"], **record}
+                    results.write(rec)
+                    done.add(rid)
+                    summary["completed_new"] += 1
+                    write_cache_copies(rec)
             now = time.time()
             if now - last_progress >= progress_every:
                 last_progress = now
                 ledger.save()
-                rate_s = summary["requests"] / max(now - started, 1e-9)
+                rate_s = dispatched / max(now - started, 1e-9)
                 left = len(units) - dispatched
                 eta_h = left / rate_s / 3600 if rate_s else float("inf")
                 msg = (f"  {summary['requests']:,} requests, {len(done):,} reviews done, "
-                       f"{rate_s:.1f} req/s, ${ledger.spent:.4f} spent, ~{eta_h:.1f} h left")
+                       f"{rate_s:.1f} texts/s, ${ledger.spent:.4f} spent, ~{eta_h:.1f} h left")
                 log(msg)
                 log_event(runlog, event="progress", requests=summary["requests"], completed=len(done),
-                          req_per_s=round(rate_s, 3), spent_usd=round(ledger.spent, 6))
+                          texts_per_s=round(rate_s, 3), spent_usd=round(ledger.spent, 6))
 
     results.close()
     calls.close()

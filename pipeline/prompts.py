@@ -11,7 +11,7 @@ Wording is deliberately short: Jev bills input tokens and the questions are sent
 review, so question length drives the cost of the full run.
 """
 
-ENRICH_VERSION = "enrich-v4"
+ENRICH_VERSION = "enrich-v5"
 VERIFY_VERSION = "verify-v1"
 GROUP_VERSION = "group-v1"
 MEMO_VERSION = "memo-v1"
@@ -20,7 +20,8 @@ SCHEMA_VERSION = "schema-v3"
 TOPICS = ("access", "usability", "playback", "downloads", "catalog", "billing", "support", "other")
 INTENTS = ("cancellation", "complaint", "request", "praise", "unclear")   # precedence order
 
-# enrich-v4: compressed wording. The v3 pilot (2026-10-20) measured ~813 billed input tokens per request,
+# enrich-v5 (= v4 wording, cancellation reworded after the v4 pilot moved 7 cancellations to complaint;
+# sent up to 20 reviews per request). enrich-v4: compressed wording. The v3 pilot (2026-10-20) measured ~813 billed input tokens per request,
 # almost all from question text (~0.44 tokens per character of question JSON), projecting to ~$17 for the
 # full run against a $10 cap. v4 keeps the same labels and order in about a third of the characters; the
 # contract's detailed rules (tie-breaks, premium-only controls, boycott slogans) are no longer spelled out to
@@ -31,7 +32,7 @@ ENRICH_QUESTIONS = {
                            "downloads": "offline", "catalog": "songs, search, lyrics", "billing": "price, premium",
                            "support": "customer support", "other": "general"}},
     "intent": {"type": "choice", "instructions": "Intent",
-               "criteria": {"cancellation": "quitting", "complaint": "negative", "request": "wants change",
+               "criteria": {"cancellation": "leaving, uninstalling, cancelling", "complaint": "negative", "request": "wants change",
                             "praise": "positive", "unclear": "meaningless"}},
     "severity": {"type": "choice", "instructions": "Problem severity",
                  "criteria": {"1": "none", "2": "annoyance", "3": "degraded", "4": "blocked",
