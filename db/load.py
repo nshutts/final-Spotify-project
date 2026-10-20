@@ -29,8 +29,10 @@ BATCH = 5000
 class Supabase:
     def __init__(self, url, key):
         self.base = url.rstrip("/") + "/rest/v1/"
-        self.headers = {"apikey": key, "Authorization": f"Bearer {key}", "Content-Type": "application/json",
+        self.headers = {"apikey": key, "Content-Type": "application/json",
                         "Prefer": "resolution=merge-duplicates,return=minimal"}
+        if not key.startswith("sb_"):          # legacy JWT keys also go in Authorization; new sb_ keys must not
+            self.headers["Authorization"] = f"Bearer {key}"
 
     def upsert(self, table, rows):
         keys = list(dict.fromkeys(k for r in rows for k in r))      # PostgREST needs identical keys per batch
