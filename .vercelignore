@@ -1,0 +1,14 @@
+# Only the dashboard page and API functions are deployed; pipeline code and evidence stay in GitHub.
+data
+runs
+grading
+outputs
+cost
+evals
+tests
+tools
+pipeline
+db
+docs
+*.py
+requirements.txt

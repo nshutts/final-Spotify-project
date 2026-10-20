@@ -1,4 +1,7 @@
 {
+  "framework": null,
+  "installCommand": "echo 'no install needed: static page + Node functions'",
+  "buildCommand": "echo 'no build step'",
   "outputDirectory": "public",
   "functions": { "api/*.js": { "maxDuration": 15 } }
 }
