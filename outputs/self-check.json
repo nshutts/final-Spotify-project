@@ -1,0 +1,116 @@
+{
+  "audit_script_sha256": "d60bd66d84922d934c65b3d42b2c7d36cc738e8c75e2d6f2b2f58bca3141c26d",
+  "audit_version": "a5-audit-v1",
+  "automatic_grade": null,
+  "calculated_ranking": [
+    {
+      "complaint_count": 101800,
+      "issue_id": "ISS-OTHER",
+      "mean_severity": "2.521621",
+      "priority_score": 256701,
+      "rank": 1,
+      "severity_sum": 256701
+    },
+    {
+      "complaint_count": 77428,
+      "issue_id": "ISS-USABILITY",
+      "mean_severity": "2.643307",
+      "priority_score": 204666,
+      "rank": 2,
+      "severity_sum": 204666
+    },
+    {
+      "complaint_count": 43845,
+      "issue_id": "ISS-BILLING",
+      "mean_severity": "3.334861",
+      "priority_score": 146217,
+      "rank": 3,
+      "severity_sum": 146217
+    },
+    {
+      "complaint_count": 34136,
+      "issue_id": "ISS-PLAYBACK",
+      "mean_severity": "3.441411",
+      "priority_score": 117476,
+      "rank": 4,
+      "severity_sum": 117476
+    },
+    {
+      "complaint_count": 10761,
+      "issue_id": "ISS-ACCESS",
+      "mean_severity": "3.931977",
+      "priority_score": 42312,
+      "rank": 5,
+      "severity_sum": 42312
+    },
+    {
+      "complaint_count": 13584,
+      "issue_id": "ISS-CATALOG",
+      "mean_severity": "2.707155",
+      "priority_score": 36774,
+      "rank": 6,
+      "severity_sum": 36774
+    },
+    {
+      "complaint_count": 6343,
+      "issue_id": "ISS-DOWNLOADS",
+      "mean_severity": "3.399811",
+      "priority_score": 21565,
+      "rank": 7,
+      "severity_sum": 21565
+    },
+    {
+      "complaint_count": 819,
+      "issue_id": "ISS-SUPPORT",
+      "mean_severity": "3.256410",
+      "priority_score": 2667,
+      "rank": 8,
+      "severity_sum": 2667
+    }
+  ],
+  "coverage": {
+    "accounted_fraction": 1.0,
+    "duplicate_ids": 0,
+    "expected": 660622,
+    "invalid_or_unresolved": 0,
+    "labelable": 660609,
+    "labelable_completion_fraction": 1.0,
+    "missing": 0,
+    "quarantined": 13,
+    "received_lines": 660622,
+    "unique_expected_ids": 660622,
+    "valid_cache_reuses": 176420,
+    "valid_completed": 660609,
+    "valid_completion_fraction": 0.99998
+  },
+  "examples": [],
+  "hash_convention": "Reference/benchmark: canonical UTF-8 JSON via canonical(); input files and audit script: exact bytes.",
+  "input_files_sha256": {
+    "calls.jsonl.gz": "4dbb3670b8f329458585a0116765ef54d603e9dbf32f878ba057d001aa1624d5",
+    "checkpoint_after.json": "fb9dabaaf16c300162879db565e29fded33aa1dd23f7404118bf30998bc82488",
+    "checkpoint_before.json": "281dc9b3b873696d6cadcdb38c8e6cbbbab225896c02733bc5012ef0f3acb717",
+    "claims.csv": "64de7217fccaaa0f3137c869aff2162c2a5f89c17d9ff62a5ec09253240bf840",
+    "ingestion.json": "3e5e01083c3d0a338bb584f71b3a5420485783f5ca9d085b8cac89a51b42752a",
+    "membership.csv": "0ea166e900bb9a951fb75eab114b2d26dc8d3ef9690563c6d0c3140c172e1f87",
+    "ranking.csv": "a19ed8fed6f1815bd99353db4f86e8e91a73d0d506c6d1c3f996ea4c45460954",
+    "records.jsonl.gz": "09e11f1e8ec0e4cef617b7cb0ba03253cf6b284c81409e8170fcedcbf91f3fd0",
+    "run.json": "b53816ca17598fd7bac7941f663bec4986be6f31e3ba3ab3fd72efc9c86b37ce"
+  },
+  "issue_counts": {},
+  "limits": [
+    "Artifacts do not prove actual model execution, authorship, cost, or independent verification.",
+    "Exact quote membership does not prove that the quote supports the label.",
+    "Claims export checks numbers; a person must check that all memo claims are represented.",
+    "Benchmark agreement is diagnostic; final 4/3/3 grades require rubric review."
+  ],
+  "quality": {
+    "official": false,
+    "status": "not_supplied"
+  },
+  "reference_sha256": "bb31d47db9b9a85cd97b3ba6e880915aff41a6127c3accee719c139ab34b7e97",
+  "reported_calls": 25233,
+  "reported_input_tokens": 209154462,
+  "reported_output_tokens": 100354134,
+  "status": "pass",
+  "working_coverage_point_candidate": 1.0
+}

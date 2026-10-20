@@ -1,0 +1,89 @@
+{
+  "input_hash": "4aff6501546a6883207fae97ef03f7a5da369e680e6a91de6e5c1ebdc9479682",
+  "prompt_version": "memo-v1",
+  "choice": "usability",
+  "probabilities": {
+    "access": 0.0,
+    "usability": 1.0,
+    "playback": 0.0,
+    "billing_support": 0.0
+  },
+  "state_sent": {
+    "question": "Where should the next quarter of Spotify product effort go?",
+    "metric_definitions": {
+      "complaint_count": "complaint or cancellation reviews in the area",
+      "severity_sum": "sum of severity 1-5 over those reviews (priority score)",
+      "share_of_all_complaints": "complaint_count / all complaint reviews"
+    },
+    "areas": {
+      "access": {
+        "issues": [
+          "ISS-ACCESS"
+        ],
+        "complaint_count": 162,
+        "severity_sum": 625,
+        "share_of_all_complaints": 0.0374,
+        "issue_names": [
+          "login or sign-in failures"
+        ],
+        "examples": [
+          "Why am I paying for this? Unable to login, can not reach tech support. Looks like the account was hacked.",
+          "My account was hacked and your webchat, Facebook and Twitter team are not helping me. Our email team are not responding to me. I pay for family account and I cannot use it. Great service until it goes wrong. No telephone support and other r",
+          "Whenever I close the app it always logs me out and it did it this time and I had 1300 liked songs and lost all of them"
+        ]
+      },
+      "usability": {
+        "issues": [
+          "ISS-USABILITY"
+        ],
+        "complaint_count": 1222,
+        "severity_sum": 3185,
+        "share_of_all_complaints": 0.2818,
+        "issue_names": [
+          "too many or intrusive ads"
+        ],
+        "examples": [
+          "I m using this app from 5 to 6 year but now m uninstald this app cz his premium adds are everywhere now .",
+          "For free subscription I find this to be a cancerous and even dangerous app while driving.",
+          "This app is not good it trase our history and their are many ads in it and it is very difficult to use."
+        ]
+      },
+      "playback": {
+        "issues": [
+          "ISS-PLAYBACK"
+        ],
+        "complaint_count": 526,
+        "severity_sum": 1825,
+        "share_of_all_complaints": 0.1213,
+        "issue_names": [
+          "songs stop, pause or skip"
+        ],
+        "examples": [
+          "You took away the ability to watch video podcasts on my TV. This is literally the reason I have a paid subscription.",
+          "Would give a ZERO star if could.",
+          "It abruptly stops and can't play songs anymore. Also, i tried the mini premium paid for it 2x yet i wasn't able to have the said 1 day subscription. Didn't went through the hassle of figuring out the problem. Waste of time."
+        ]
+      },
+      "billing_support": {
+        "issues": [
+          "ISS-BILLING",
+          "ISS-SUPPORT"
+        ],
+        "complaint_count": 686,
+        "severity_sum": 2143,
+        "share_of_all_complaints": 0.1582,
+        "issue_names": [
+          "basic features locked behind Premium",
+          "unhelpful support"
+        ],
+        "examples": [
+          "Yo estoy pagando el Spotify premium, para que me cuenten el stream que hago y ahorita le quitan eso, APRENDAN A MÁS QUE SEA DISIMULAR PORQUE LO QUE HICIERON ES UN ROBO AL OJO",
+          "Why am i getting ads on podcasts on my premium account? What is the point of paying a premium!!",
+          "Worst app ever this app is charging me for playback and"
+        ]
+      }
+    }
+  },
+  "confidence": 1.0,
+  "model": "jev-1.13.0"
+}

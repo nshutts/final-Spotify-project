@@ -1,0 +1,89 @@
+{
+  "input_hash": "9ada79cf9b584c47a23ddae6c6ae79a29e2fca52194d88623290c46bcdd6d743",
+  "prompt_version": "memo-v1",
+  "choice": "usability",
+  "probabilities": {
+    "access": 0.0,
+    "usability": 1.0,
+    "playback": 0.0,
+    "billing_support": 0.0
+  },
+  "state_sent": {
+    "question": "Where should the next quarter of Spotify product effort go?",
+    "metric_definitions": {
+      "complaint_count": "complaint or cancellation reviews in the area",
+      "severity_sum": "sum of severity 1-5 over those reviews (priority score)",
+      "share_of_all_complaints": "complaint_count / all complaint reviews"
+    },
+    "areas": {
+      "access": {
+        "issues": [
+          "ISS-ACCESS"
+        ],
+        "complaint_count": 10761,
+        "severity_sum": 42312,
+        "share_of_all_complaints": 0.0373,
+        "issue_names": [
+          "login or sign-in failures"
+        ],
+        "examples": [
+          "I'm not able to login to the app. Have tried logging in with email, with my credentials, using my phone number but to no avail. And this is after I've purchased the premium membership. I'm so disappointed.",
+          "I pay for a premium family membership and I find this app poor.",
+          "You're better off paying for youtube music."
+        ]
+      },
+      "usability": {
+        "issues": [
+          "ISS-USABILITY"
+        ],
+        "complaint_count": 77428,
+        "severity_sum": 204666,
+        "share_of_all_complaints": 0.2682,
+        "issue_names": [
+          "too many or intrusive ads"
+        ],
+        "examples": [
+          "It's a paid subscription why am i still getting ads. Why is the most popular music streaming app so terrible. It constantly tells me when people on the same network are listening to something, Which I don't care about and is an invasion of ",
+          "Ads on Premium Disgusting! They're obviously not part of the podcast I'm listening to because I've listened to it on yt, absolutely filthy work Spotify. I moved from Pandora to Spotify a few years ago because of ads on Premium, guess it's t",
+          "Been premium member for years, I'm giving a 1 star revieuw today for ads during my podcast."
+        ]
+      },
+      "playback": {
+        "issues": [
+          "ISS-PLAYBACK"
+        ],
+        "complaint_count": 34136,
+        "severity_sum": 117476,
+        "share_of_all_complaints": 0.1182,
+        "issue_names": [
+          "mixed playback problems"
+        ],
+        "examples": [
+          "(this part is updated) The all is terrible.",
+          "Was good but now when I put on shuffle songs it plays the same songs in the exact order. I canceled my premium subscription after having it since thus service started due to all of the racism from pod caster",
+          "Not working on any of my devices! What have you done this time? Pointless paying you for subscription that's not working!"
+        ]
+      },
+      "billing_support": {
+        "issues": [
+          "ISS-BILLING",
+          "ISS-SUPPORT"
+        ],
+        "complaint_count": 44664,
+        "severity_sum": 148884,
+        "share_of_all_complaints": 0.1547,
+        "issue_names": [
+          "mixed billing problems",
+          "unhelpful support"
+        ],
+        "examples": [
+          "I hate this app because pay for repeat song and ad",
+          "My favourite application for music hands down However, they charged me double ( took me off student plan) without notifying me, plus I'm still a studend",
+          "I hate this app now, new update is just so senseless, you're now forcing people to buy spotify premium, such a lame thing to do, I really wish you go down with this update 👎🏻"
+        ]
+      }
+    }
+  },
+  "confidence": 1.0,
+  "model": "jev-1.13.0"
+}

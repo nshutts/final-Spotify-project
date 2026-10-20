@@ -1,0 +1,89 @@
+{
+  "input_hash": "1168b807f0b797a1f0cdb9bb4d7fbbb7b1f8f3cee0e2d6cee30378e14b699885",
+  "prompt_version": "memo-v1",
+  "choice": "usability",
+  "probabilities": {
+    "access": 0.0,
+    "usability": 0.99,
+    "playback": 0.0,
+    "billing_support": 0.01
+  },
+  "state_sent": {
+    "question": "Where should the next quarter of Spotify product effort go?",
+    "metric_definitions": {
+      "complaint_count": "complaint or cancellation reviews in the area",
+      "severity_sum": "sum of severity 1-5 over those reviews (priority score)",
+      "share_of_all_complaints": "complaint_count / all complaint reviews"
+    },
+    "areas": {
+      "access": {
+        "issues": [
+          "ISS-ACCESS"
+        ],
+        "complaint_count": 14,
+        "severity_sum": 56,
+        "share_of_all_complaints": 0.0603,
+        "issue_names": [
+          "login or sign-in failures"
+        ],
+        "examples": [
+          "Top algorithm, but again hacked ,can't even recover the playlists set by me last week ,cost over three hundred dollars,per week for nothing ,",
+          "I was using the app normally with the phone in my pocket, and out of nowhere log me out, and now I'm not able to log in, it's appearing some kind of error all the time, and the up is up to date, and also I can still loogin in the PC 🙃",
+          "I can't login to the app, it keep saying that there's no internet connection, whereas everything else on my phone is connected to the internet."
+        ]
+      },
+      "usability": {
+        "issues": [
+          "ISS-USABILITY"
+        ],
+        "complaint_count": 64,
+        "severity_sum": 164,
+        "share_of_all_complaints": 0.2759,
+        "issue_names": [
+          "shuffle and skip limits"
+        ],
+        "examples": [
+          "Can't switch between video and audio only podcasts. Too much email spam. I pay for premium, so just take my money and leave me alone. I don't want a Car Thing, merch, or emails about what I listened to this year.",
+          "It is absolutely useless after the latest update. There's nothing I can do without the \"try premium\" option popping up every damn time.",
+          "The update made the app useless .... Uninstall krdia ye app ab bekar hai ... Wynk hi theek h"
+        ]
+      },
+      "playback": {
+        "issues": [
+          "ISS-PLAYBACK"
+        ],
+        "complaint_count": 29,
+        "severity_sum": 101,
+        "share_of_all_complaints": 0.125,
+        "issue_names": [
+          "mixed playback problems"
+        ],
+        "examples": [
+          "The very second I signed up for premium it stopped letting me play anything.. lol . Fastest cancelation of a service I've done, ever. Bye bye Spotify. Hello old friend, Bittorrent",
+          "Black screen of death. Having to Uninstaller and reinstall after closing and opening app 5x to see if it would work.",
+          "It was working fine and all and would've gotten a 5 star if it hadn't been for this glitch I've started to experience just this December."
+        ]
+      },
+      "billing_support": {
+        "issues": [
+          "ISS-BILLING",
+          "ISS-SUPPORT"
+        ],
+        "complaint_count": 39,
+        "severity_sum": 118,
+        "share_of_all_complaints": 0.1681,
+        "issue_names": [
+          "basic features locked behind Premium",
+          "unhelpful support"
+        ],
+        "examples": [
+          "I am not like now they are so much charges to listen music or replay again the music there is a charger so that's why I don't like it this app now 😕",
+          "Very bad experience ever faced by any app. They are literally forcing us to purchase Spotify premium.",
+          "The made everything paid at this point they will take money to play the song almost all features are gone limited songs of your choice"
+        ]
+      }
+    }
+  },
+  "confidence": 0.99,
+  "model": "jev-1.13.0"
+}

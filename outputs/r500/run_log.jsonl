@@ -1,0 +1,3 @@
+{"already_completed":0,"cap_usd":9.9,"event":"enrich_start","pending_units":479,"phase":"initial","spent_usd":0.010888,"time":"2026-10-20T14:17:27","workers":2}
+{"attempts":24,"batch_size":20,"cache_copies":21,"completed_new":479,"completed_total":500,"event":"enrich_end","failed_attempts":0,"input_tokens":204633,"invalid_retries":0,"label_config":"jev-1.13.0|enrich-v5|schema-v3","output_tokens":99065,"phase":"initial","quarantined":0,"requests":24,"skipped_done":0,"spent_usd_ledger":0.01948221,"stop_reason":"finished","time":"2026-10-20T14:17:30","wall_seconds":2.906,"workers":2}
+{"event":"all_done","spent_usd_ledger":0.02173534,"stage_seconds":{"enrich":2.91,"group":1.573,"memo":0.219,"rank":0.011,"verify":9.195},"time":"2026-10-20T14:17:41","wall_seconds":13.923}
