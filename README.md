@@ -224,7 +224,7 @@ Rules were written and committed before the evaluation ran ([docs/EVALUATION_RUL
 | Severity exact agreement | 39/50 (78%); mean absolute error 0.24 |
 | Sentiment | MAE 0.137; within the declared ±0.5 tolerance on 48/50 |
 | Evidence quote, exact substring (code) | 50/50 |
-| Evidence quote supports the predicted topic and intent | 42/50, judged per review by reading each quote (drafted with an AI assistant for the author's review); reasons for the 8 "no" cases in [quote_support_judgments.csv](evals/quote_support_judgments.csv). Most failures are long reviews whose first sentence is not the complaint, or praise of a specific feature labelled `other` |
+| Evidence quote supports the predicted topic and intent | 42/50, judged per review by reading each quote (drafted with an AI assistant, reviewed and accepted by the author); reasons for the 8 "no" cases in [quote_support_judgments.csv](evals/quote_support_judgments.csv). Most failures are long reviews whose first sentence is not the complaint, or praise of a specific feature labelled `other` |
 | Entities | 27 predicted, **0 unsupported additions**; 5 of 27 human entities missed |
 | needs_review (as a prediction) | both yes 1, model yes/human no 3, model no/human yes 10, both no 36; precision 0.25, recall 0.09; flagged 2 of 11 topic or intent errors |
 | Ambiguous cases | 11 (marked by the labeller; none dropped) |
