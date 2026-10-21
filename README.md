@@ -50,7 +50,7 @@ Measured values and estimates are kept separate throughout. Everything above is 
 | **Testing 2:** independent verification, planted-error and injection tests | [outputs/full/verify/](outputs/full/verify/) (report, 634 disagreement rows, predictions); planted error caught; real-model injection test 4/4 resisted ([evals/injection_results.json](evals/injection_results.json)); simulator tests in [tests/test_pipeline.py](tests/test_pipeline.py) |
 | **Testing 3:** real 100-review cold/warm pilot, offline calculator, retry/spend/recovery controls | [cost/report.md](cost/report.md) and [cost/](cost/); earlier pilots in [cost/pilot_v3/](cost/pilot_v3/), [cost/pilot_v4/](cost/pilot_v4/); offline replay `python3 -m cost.pilot report`; [Cost and runtime](#cost-and-runtime) |
 | **Working 1:** full ingestion, coverage, classification | [grading/ingestion.json](grading/ingestion.json); [grading/records.jsonl.gz](grading/records.jsonl.gz) (660,622 rows); checker coverage 1.0 |
-| **Working 2:** staged program, bounded calls, saved handoffs, resume | `run.py` stages; ≤20 reviews per request; [grading/calls.jsonl.gz](grading/calls.jsonl.gz); [grading/checkpoint_before.json](grading/checkpoint_before.json) (636,360 IDs) and [grading/checkpoint_after.json](grading/checkpoint_after.json) (660,609 IDs); [Interruption and resume](#interruption-and-resume) |
+| **Working 2:** staged program, bounded calls, saved handoffs, resume | `run.py` stages; ≤20 reviews per request; [grading/calls.jsonl.gz](grading/calls.jsonl.gz); screen recordings in [recordings/](recordings/); [grading/checkpoint_before.json](grading/checkpoint_before.json) (636,360 IDs) and [grading/checkpoint_after.json](grading/checkpoint_after.json) (660,609 IDs); [Interruption and resume](#interruption-and-resume) |
 | **Working 3:** reproducible ranking, deployed dashboard with grounded AI recommendation | `python3 run.py rank --work runs/full` (no model); [grading/ranking.csv](grading/ranking.csv); dashboard https://final-spotify-project-eight.vercel.app |
 
 ---
@@ -205,6 +205,13 @@ The final pilot: cold run 7.1 s wall clock, $0.002766 API cost; **warm run 0.02 
 
 The full run was stopped with Ctrl-C at 16:09 after 636,360 completed reviews (22,997 requests). The stop handler finished in-flight requests and saved [`checkpoint_before.json`](grading/checkpoint_before.json). The resumed command started in phase `resume`, sent only the 24,249 pending texts (1,213 requests, phase `resume` in the call log) and finished at 660,609 ([`checkpoint_after.json`](grading/checkpoint_after.json)). No ID in the first checkpoint appears in a resume call; the checker confirms this. Log: [outputs/full/run_log.jsonl](outputs/full/run_log.jsonl).
 
+**Screen recordings** (Terminal plus the assistant chat used to run the pipeline; 10 fps, half resolution; the list of unrelated chat titles in the sidebar is blurred):
+
+| File | Clock time | What it shows |
+|---|---|---|
+| [recordings/recording_1_full_run_start_1542.mp4](recordings/recording_1_full_run_start_1542.mp4) (11 min) | 15:42 to 15:53 | `run.py prepare` on the full CSV (660,622 rows, 13 empty texts, 484,189 distinct texts), then the full enrichment run starting in phase `initial` with live progress and spend |
+| [recordings/recording_2_interrupt_and_resume_1608.mp4](recordings/recording_2_interrupt_and_resume_1608.mp4) (11 min) | 16:08 to 16:19 | Ctrl-C at about 0:20 ("Stopping: finishing in-flight requests and saving", checkpoint with 636,360 IDs); `run.py status`; then `run.py all` restarting in phase `resume` with 24,249 texts left (about 7:00 onward) |
+
 ---
 
 ## Evaluation
@@ -310,3 +317,4 @@ Review `10cb1b12-edd3-4a3f-979c-ad0864313fa6`: "The ads annoys me very much ....
 | `docs/` | assignment scope, labelling guide, predeclared evaluation rules |
 | `tests/` | offline tests |
 | `tools/` | course checker copy, pilot comparison |
+| `recordings/` | screen recordings of the full run start and of the interruption and resume |
