@@ -8,6 +8,7 @@ browser or committed). Apply db/schema.sql first. Safe to rerun: rows are upsert
 
 import argparse
 import csv
+import http.client
 import json
 import os
 import sys
@@ -23,7 +24,7 @@ sys.path.insert(0, str(ROOT))
 from pipeline.common import read_jsonl  # noqa: E402
 from pipeline.prepare import iter_rows, row_sha  # noqa: E402
 
-BATCH = 5000
+BATCH = 1000   # rows per request; larger requests were dropped by the free-tier database
 
 
 class Supabase:
@@ -34,10 +35,10 @@ class Supabase:
         if not key.startswith("sb_"):          # legacy JWT keys also go in Authorization; new sb_ keys must not
             self.headers["Authorization"] = f"Bearer {key}"
 
-    def upsert(self, table, rows):
+    def upsert(self, table, rows, start=0):
         keys = list(dict.fromkeys(k for r in rows for k in r))      # PostgREST needs identical keys per batch
         rows = [{k: r.get(k) for k in keys} for r in rows]
-        for i in range(0, len(rows), BATCH):
+        for i in range(start, len(rows), BATCH):
             chunk = rows[i:i + BATCH]
             body = json.dumps(chunk, ensure_ascii=False).encode("utf-8")
             for attempt in range(5):
@@ -51,11 +52,11 @@ class Supabase:
                         time.sleep(2 ** attempt)
                         continue
                     sys.exit(f"Supabase {table} HTTP {e.code}: {detail}")
-                except (urllib.error.URLError, TimeoutError) as e:
+                except (urllib.error.URLError, TimeoutError, OSError, http.client.HTTPException) as e:
                     if attempt < 4:
                         time.sleep(2 ** attempt)
                         continue
-                    sys.exit(f"Supabase network error: {e}")
+                    sys.exit(f"Supabase network error at row {i:,}: {e}. Rerun with --start-row {i} to continue.")
             if len(rows) > BATCH:
                 print(f"  {table}: {min(i + BATCH, len(rows)):,}/{len(rows):,}", end="\r", flush=True)
         print(f"  {table}: {len(rows):,} rows" + " " * 20)
@@ -170,6 +171,8 @@ def main():
     ap.add_argument("--work", default="runs/full")
     ap.add_argument("--csv", default="data/spotify_reviews_18months.csv")
     ap.add_argument("--skip-reviews", action="store_true", help="reload only the small tables")
+    ap.add_argument("--reviews-only", action="store_true", help="load only the reviews table")
+    ap.add_argument("--start-row", type=int, default=0, help="resume the reviews load from this row")
     a = ap.parse_args()
     import config  # loads .env
     url, key = os.getenv("SUPABASE_URL", "").strip(), os.getenv("SUPABASE_SERVICE_KEY", "").strip()
@@ -177,10 +180,11 @@ def main():
         sys.exit("Set SUPABASE_URL and SUPABASE_SERVICE_KEY in .env first.")
     data = build(a.work, a.csv)
     db = Supabase(url, key)
-    for table in ("metrics", "issues", "claims", "evidence", "monthly"):
-        db.upsert(table, data[table])
+    if not a.reviews_only:
+        for table in ("metrics", "issues", "claims", "evidence", "monthly"):
+            db.upsert(table, data[table])
     if not a.skip_reviews:
-        db.upsert("reviews", data["reviews"])
+        db.upsert("reviews", data["reviews"], start=a.start_row)
     print("Loaded. Dashboard data is live.")
 
 
