@@ -21,8 +21,12 @@
   },
   "evidence_quote_exact_substring": {
     "share": 1.0,
-    "count": 50,
-    "supports_label": "human check: see quote_supports_label in golden_cases.csv"
+    "count": 50
+  },
+  "evidence_quote_supports_label": {
+    "yes": 42,
+    "no": 8,
+    "source": "evals/quote_support_judgments.csv (judged per review)"
   },
   "entities": {
     "predicted": 27,

@@ -43,15 +43,15 @@ Measured values and estimates are kept separate throughout. Everything above is 
 | Criterion | Evidence |
 |---|---|
 | **Deliverable 1:** accessible code, setup, artifacts | [Setup](#setup-and-commands); `run.py`; `requirements.txt`; [.env.example](.env.example); offline tests (`python3 -m pytest -q`, 26 tests); grading export in [grading/](grading/) |
-| **Deliverable 2:** architecture, shared schema, provenance | [Architecture](#architecture); [pipeline/prompts.py](pipeline/prompts.py) (versioned questions); `label_config` on every record and call; source row hashes; `cache_source_id`; [outputs/full/run_summary.json](outputs/full/run_summary.json) |
+| **Deliverable 2:** architecture, shared schema, provenance | [Architecture](#architecture); [pipeline/prompts.py](pipeline/prompts.py) (versioned questions); `label_config` on every record and call; source row hashes; `cache_source_id`; run manifest [outputs/full/data_manifest.json](outputs/full/data_manifest.json) (source checksum, code commit, prompt versions, model, settings, output hashes); [outputs/full/run_summary.json](outputs/full/run_summary.json) |
 | **Deliverable 3:** memo numbers linked to calculations and evidence | [memo.md](memo.md) cites [claims.csv](grading/claims.csv) IDs; code check [outputs/full/memo/check.json](outputs/full/memo/check.json) (`ok`); the checker recomputes every claim from records and membership (pass) |
 | **Deliverable 4:** recommendation, alternatives, limitations | [memo.md](memo.md); [Ranking and recommendation](#ranking-and-recommendation); [Limitations](#limitations) |
 | **Testing 1:** 50 human labels, per-field comparison, error analysis | [evals/golden_50_labeled.csv](evals/golden_50_labeled.csv); [evals/golden_report.md](evals/golden_report.md); [evals/golden_cases.csv](evals/golden_cases.csv); [evals/golden_results.json](evals/golden_results.json); rules declared first in [docs/EVALUATION_RULES.md](docs/EVALUATION_RULES.md) |
 | **Testing 2:** independent verification, planted-error and injection tests | [outputs/full/verify/](outputs/full/verify/) (report, 634 disagreement rows, predictions); planted error caught; real-model injection test 4/4 resisted ([evals/injection_results.json](evals/injection_results.json)); simulator tests in [tests/test_pipeline.py](tests/test_pipeline.py) |
 | **Testing 3:** real 100-review cold/warm pilot, offline calculator, retry/spend/recovery controls | [cost/report.md](cost/report.md) and [cost/](cost/); earlier pilots in [cost/pilot_v3/](cost/pilot_v3/), [cost/pilot_v4/](cost/pilot_v4/); offline replay `python3 -m cost.pilot report`; [Cost and runtime](#cost-and-runtime) |
-| **Working 1:** full ingestion, coverage, classification | [grading/ingestion.json](grading/ingestion.json); [grading/records.jsonl.gz](grading/records.jsonl.gz) (660,622 rows); checker coverage 1.0 |
-| **Working 2:** staged program, bounded calls, saved handoffs, resume | `run.py` stages; ≤20 reviews per request; [grading/calls.jsonl.gz](grading/calls.jsonl.gz); screen recordings in [recordings/](recordings/); [grading/checkpoint_before.json](grading/checkpoint_before.json) (636,360 IDs) and [grading/checkpoint_after.json](grading/checkpoint_after.json) (660,609 IDs); [Interruption and resume](#interruption-and-resume) |
-| **Working 3:** reproducible ranking, deployed dashboard with grounded AI recommendation | `python3 run.py rank --work runs/full` (no model); [grading/ranking.csv](grading/ranking.csv); dashboard https://final-spotify-project-eight.vercel.app |
+| **Working 1:** full ingestion, coverage, classification | [outputs/full/ingestion_report.json](outputs/full/ingestion_report.json) (every stated fact verified: 660,622 rows, 13 empty texts, 159,701 missing app versions, 0 repeated IDs, 484,189 distinct texts, file checksum); [grading/ingestion.json](grading/ingestion.json); enriched table [grading/records.jsonl.gz](grading/records.jsonl.gz) (660,622 rows); quarantine log [outputs/full/quarantine.jsonl](outputs/full/quarantine.jsonl); checker coverage 1.0 |
+| **Working 2:** staged program, bounded calls, saved handoffs, resume | `run.py` stages; ≤20 reviews per request; [grading/calls.jsonl.gz](grading/calls.jsonl.gz); screen recording in [recordings/](recordings/); [grading/checkpoint_before.json](grading/checkpoint_before.json) (636,360 IDs) and [grading/checkpoint_after.json](grading/checkpoint_after.json) (660,609 IDs); [Interruption and resume](#interruption-and-resume) |
+| **Working 3:** reproducible ranking, deployed dashboard with grounded AI recommendation | `python3 run.py rank --work runs/full` (no model); [grading/ranking.csv](grading/ranking.csv); [outputs/full/aggregates.csv](outputs/full/aggregates.csv); regeneration from saved records and membership matches exactly ([evals/reproducibility.json](evals/reproducibility.json)); dashboard https://final-spotify-project-eight.vercel.app |
 
 ---
 
@@ -139,6 +139,8 @@ python3 run.py rank --work runs/full                   # regenerate the ranking 
 python3 tools/check_submission.py check --reference local-reference.json --submission grading --out self-check.json
 python3 evals/golden_eval.py --results evals/golden_predictions.jsonl   # rescore the golden set
 python3 evals/injection_test.py --report               # re-print the saved injection outcome
+python3 tools/build_reports.py                          # rebuild manifest, ingestion report, quarantine log,
+                                                       # aggregates and the reproducibility check from grading/
 ```
 
 To rerank without the 345 MB working folder, rebuild it from the export: `records.jsonl.gz` plus `membership.csv` are exactly what `pipeline/rank.compute` reads (the checker does this independently).
@@ -205,12 +207,7 @@ The final pilot: cold run 7.1 s wall clock, $0.002766 API cost; **warm run 0.02 
 
 The full run was stopped with Ctrl-C at 16:09 after 636,360 completed reviews (22,997 requests). The stop handler finished in-flight requests and saved [`checkpoint_before.json`](grading/checkpoint_before.json). The resumed command started in phase `resume`, sent only the 24,249 pending texts (1,213 requests, phase `resume` in the call log) and finished at 660,609 ([`checkpoint_after.json`](grading/checkpoint_after.json)). No ID in the first checkpoint appears in a resume call; the checker confirms this. Log: [outputs/full/run_log.jsonl](outputs/full/run_log.jsonl).
 
-**Screen recordings** (Terminal plus the assistant chat used to run the pipeline; 10 fps, half resolution; the list of unrelated chat titles in the sidebar is blurred):
-
-| File | Clock time | What it shows |
-|---|---|---|
-| [recordings/recording_1_full_run_start_1542.mp4](recordings/recording_1_full_run_start_1542.mp4) (11 min) | 15:42 to 15:53 | `run.py prepare` on the full CSV (660,622 rows, 13 empty texts, 484,189 distinct texts), then the full enrichment run starting in phase `initial` with live progress and spend |
-| [recordings/recording_2_interrupt_and_resume_1608.mp4](recordings/recording_2_interrupt_and_resume_1608.mp4) (11 min) | 16:08 to 16:19 | Ctrl-C at about 0:20 ("Stopping: finishing in-flight requests and saving", checkpoint with 636,360 IDs); `run.py status`; then `run.py all` restarting in phase `resume` with 24,249 texts left (about 7:00 onward) |
+**Screen recording:** [recordings/recording_2_interrupt_and_resume_1608.mp4](recordings/recording_2_interrupt_and_resume_1608.mp4) (11 min, 16:08 to 16:19; Terminal plus the assistant chat used to run the pipeline; 10 fps, half resolution; the sidebar list of unrelated chat titles is blurred). It shows saved work (progress lines up to 632,480 reviews), Ctrl-C at about 0:20 ("Stopping: finishing in-flight requests and saving", checkpoint with 636,360 IDs), `run.py status`, then `run.py all` restarting in phase `resume` with 24,249 texts left (about 7:00 onward).
 
 ---
 
@@ -227,7 +224,7 @@ Rules were written and committed before the evaluation ran ([docs/EVALUATION_RUL
 | Severity exact agreement | 39/50 (78%); mean absolute error 0.24 |
 | Sentiment | MAE 0.137; within the declared ±0.5 tolerance on 48/50 |
 | Evidence quote, exact substring (code) | 50/50 |
-| Evidence quote supports the label (human) | column `quote_supports_label` in [golden_cases.csv](evals/golden_cases.csv) |
+| Evidence quote supports the predicted topic and intent | 42/50, judged per review by reading each quote (drafted with an AI assistant for the author's review); reasons for the 8 "no" cases in [quote_support_judgments.csv](evals/quote_support_judgments.csv). Most failures are long reviews whose first sentence is not the complaint, or praise of a specific feature labelled `other` |
 | Entities | 27 predicted, **0 unsupported additions**; 5 of 27 human entities missed |
 | needs_review (as a prediction) | both yes 1, model yes/human no 3, model no/human yes 10, both no 36; precision 0.25, recall 0.09; flagged 2 of 11 topic or intent errors |
 | Ambiguous cases | 11 (marked by the labeller; none dropped) |
@@ -307,7 +304,7 @@ Review `10cb1b12-edd3-4a3f-979c-ad0864313fa6`: "The ads annoys me very much ....
 | `run.py` | orchestrator: `prepare`, `enrich`, `verify`, `group`, `rank`, `memo`, `all`, `checkpoint`, `export`, `status` |
 | `pipeline/` | stages, versioned prompts, Jev client, offline simulator, shared ledger and I/O |
 | `grading/` | standardized export for `check_submission.py` (records and calls gzipped) |
-| `outputs/full/` | full-run stage outputs: verify, group, rank, memo, run log, run summary |
+| `outputs/full/` | full-run stage outputs: verify, group, rank, memo, run log, run summary, run manifest, ingestion report, quarantine log, aggregates |
 | `outputs/r500/`, `outputs/r10k/` | 500 and 10,000-review checkpoint runs |
 | `cost/` | calculator, pilots (v3, v4, final), usage, rates, assumptions, report |
 | `evals/` | golden labels, predictions, results, report, per-case table; injection test |
@@ -316,5 +313,5 @@ Review `10cb1b12-edd3-4a3f-979c-ad0864313fa6`: "The ads annoys me very much ....
 | `db/` | database schema and loader |
 | `docs/` | assignment scope, labelling guide, predeclared evaluation rules |
 | `tests/` | offline tests |
-| `tools/` | course checker copy, pilot comparison |
-| `recordings/` | screen recordings of the full run start and of the interruption and resume |
+| `tools/` | course checker copy, pilot comparison, report builder (`build_reports.py`) |
+| `recordings/` | screen recording of the interruption and resume |

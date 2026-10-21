@@ -1,0 +1,8 @@
+{
+  "ranking_regenerated_equals_saved": true,
+  "two_regenerations_identical": true,
+  "issues": 8,
+  "memberships": 288716,
+  "method": "pipeline.rank.compute over grading/records.jsonl.gz and grading/membership.csv; no model call",
+  "course_checker": "pass"
+}

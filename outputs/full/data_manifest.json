@@ -1,0 +1,54 @@
+{
+  "run_id": "full-2026-10-20",
+  "source_file": "spotify_reviews_18months.csv",
+  "source_sha256": "1fc85de68a304dd8978b537cfa58793d5f41cbaf417fa32cb53899f83a2fcef6",
+  "source_bytes": 97400616,
+  "code_commit_at_manifest_build": "950fff286f6518306b101ee5794383335a136945",
+  "provider": "TypeSafe Jev",
+  "model": "jev-1.13.0",
+  "reasoning_or_effort_setting": "none exists for Jev",
+  "label_config": "jev-1.13.0|enrich-v5|schema-v3",
+  "prompt_versions": {
+    "enrich": "enrich-v5",
+    "verify": "verify-v1",
+    "group": "group-v1",
+    "memo": "memo-v1",
+    "schema": "schema-v3"
+  },
+  "settings": {
+    "reviews_per_enrich_request": 20,
+    "workers": 4,
+    "max_http_retries": 4,
+    "max_invalid_output_retries": 1,
+    "verify_sample": 1000,
+    "verify_seed": 20261019,
+    "group_evidence_pack": 25,
+    "memo_evidence_per_area": 3,
+    "spend_cap_usd": 10.0,
+    "downstream_reserve_usd": 0.1,
+    "fallback_model": null
+  },
+  "status_counts": {
+    "completed": 660609,
+    "quarantined": 13
+  },
+  "exact_text_cache_copies": 176420,
+  "api_spend_usd_all_runs": 8.96539287,
+  "outputs_sha256": {
+    "grading/run.json": "b53816ca17598fd7bac7941f663bec4986be6f31e3ba3ab3fd72efc9c86b37ce",
+    "grading/ingestion.json": "3e5e01083c3d0a338bb584f71b3a5420485783f5ca9d085b8cac89a51b42752a",
+    "grading/records.jsonl.gz": "09e11f1e8ec0e4cef617b7cb0ba03253cf6b284c81409e8170fcedcbf91f3fd0",
+    "grading/membership.csv": "0ea166e900bb9a951fb75eab114b2d26dc8d3ef9690563c6d0c3140c172e1f87",
+    "grading/ranking.csv": "a19ed8fed6f1815bd99353db4f86e8e91a73d0d506c6d1c3f996ea4c45460954",
+    "grading/claims.csv": "64de7217fccaaa0f3137c869aff2162c2a5f89c17d9ff62a5ec09253240bf840",
+    "grading/calls.jsonl.gz": "4dbb3670b8f329458585a0116765ef54d603e9dbf32f878ba057d001aa1624d5",
+    "grading/checkpoint_before.json": "281dc9b3b873696d6cadcdb38c8e6cbbbab225896c02733bc5012ef0f3acb717",
+    "grading/checkpoint_after.json": "fb9dabaaf16c300162879db565e29fded33aa1dd23f7404118bf30998bc82488",
+    "outputs/full/group/issues.json": "e286fd09d212298c45aaa124c18790b7236f0c9749ecd2f4e4147caf6a3ffbf7",
+    "outputs/full/memo/memo.md": "c97d853e38bc82094604b3f4eb8e095dd5db1f03941cb04434fbbce14f5acaf6",
+    "outputs/full/memo/decision.json": "c6749e506216b411b4487898d15008aa098a94a90424a1b7f3bd6f39bbe15f4e",
+    "outputs/full/verify/report.json": "125ea13595ed0753c5e5eae3553497b0524a36679980370f5c02a7b6f199af52",
+    "outputs/full/aggregates.csv": "31283858bb7545ac140ab71ae88449b0ce4dfb6a2415874663b30ab4c1ab75ee",
+    "outputs/full/quarantine.jsonl": "1aaacf8778c112740a589bafaa4bcb854cb2f7f1233270a42cf9b4bf3c90870a"
+  }
+}

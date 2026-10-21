@@ -121,6 +121,9 @@ def run_pilot(csv_path, verify_sample=20):
 
 
 def build_report(rates_path=COST / "rates.csv", assumptions_path=COST / "assumptions.json"):
+    global PROMPT_VERSIONS
+    from pipeline import prompts as _p
+    PROMPT_VERSIONS = ", ".join([_p.ENRICH_VERSION, _p.VERIFY_VERSION, _p.GROUP_VERSION, _p.MEMO_VERSION, _p.SCHEMA_VERSION])
     meas = json.loads((COST / "measurements.json").read_text(encoding="utf-8"))
     a = json.loads(Path(assumptions_path).read_text(encoding="utf-8"))
     rates = load_rates(rates_path)
@@ -153,7 +156,8 @@ def build_report(rates_path=COST / "rates.csv", assumptions_path=COST / "assumpt
          f"- Input: `{meas['input_csv']}`, SHA-256 `{meas['input_sha256']}`; {n_rows} rows, "
          f"{meas['unique_texts']} unique nonempty texts.",
          f"- Provider/model: {meas['provider']} `{meas['model']}` (no thinking/effort setting exists for Jev); "
-         f"{meas['reviews_per_request']} review per request; {meas['workers']} worker; prompt versions in `pipeline/prompts.py`.",
+         f"{meas['reviews_per_request']} reviews per request; {meas['workers']} worker; prompt/schema versions "
+         f"{PROMPT_VERSIONS} (wording in `pipeline/prompts.py`); label_config `{meas['model']}|{PROMPT_VERSIONS.split(', ')[0]}|schema-v3`.",
          f"- Cold run: {rc['enrich']['completed_new']} enriched + {rc['enrich']['cache_copies']} cache copies completed, "
          f"{rc['enrich']['quarantined']} quarantined; {rc['enrich']['requests']} enrich requests, {rc['enrich']['attempts']} attempts, "
          f"{rc['enrich']['failed_attempts']} failed attempts; verify sample {meas['verify_sample']}.",

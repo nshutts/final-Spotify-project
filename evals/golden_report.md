@@ -8,7 +8,8 @@ Rules were declared before this evaluation ran (docs/EVALUATION_RULES.md). Golde
 - Intent agreement: 47/50 (94%)
 - Severity exact agreement: 39/50 (78%); MAE 0.24
 - Sentiment MAE 0.1368; within ±0.5: 48/50
-- Evidence quote exact substring (code): 50/50. Whether each quote supports the label is a human check (column quote_supports_label).
+- Evidence quote exact substring (code): 50/50.
+- Evidence quote supports the predicted topic and intent (judged per review): 42/50; reasons for each 'no' in golden_cases.csv.
 - Entities: 27 predicted, 0 unsupported additions; 5 of 27 human entities missed
 - needs_review: both yes 1, model yes/human no 3, model no/human yes 10, both no 36; precision 0.25, recall 0.0909; topic/intent errors flagged for review: 2/11
 

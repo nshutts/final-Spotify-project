@@ -5,7 +5,7 @@ Generated offline from `measurements.json`, `usage.csv` and `rates.csv`. Pilot m
 ## Measured pilot (real calls)
 
 - Input: `data/cost_100.csv`, SHA-256 `c884ac3b9be5066995d5063f96ad9af6e5e082975788c1684c4f6b6ea661dd0e`; 100 rows, 100 unique nonempty texts.
-- Provider/model: TypeSafe Jev `jev-1.13.0` (no thinking/effort setting exists for Jev); 20 review per request; 1 worker; prompt versions in `pipeline/prompts.py`.
+- Provider/model: TypeSafe Jev `jev-1.13.0` (no thinking/effort setting exists for Jev); 20 reviews per request; 1 worker; prompt/schema versions enrich-v5, verify-v1, group-v1, memo-v1, schema-v3 (wording in `pipeline/prompts.py`); label_config `jev-1.13.0|enrich-v5|schema-v3`.
 - Cold run: 100 enriched + 0 cache copies completed, 0 quarantined; 5 enrich requests, 5 attempts, 0 failed attempts; verify sample 20.
 - Warm run: 0 new enrich requests (cache hits: 100 originals reused); verify 0, group 0, memo 0 new calls.
 

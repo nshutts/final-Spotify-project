@@ -48,6 +48,10 @@ def main():
     a = ap.parse_args()
     out = Path(a.out)
     gold = list(csv.DictReader(open(a.golden, encoding="utf-8", newline="")))
+    qpath = Path(a.out) / "quote_support_judgments.csv"      # human check: does the quote support the label?
+    qsupport = {}
+    if qpath.exists():
+        qsupport = {r["review_id"]: r for r in csv.DictReader(open(qpath, encoding="utf-8", newline=""))}
     pred = load_results(a.results)
 
     cases, agree = [], Counter()
@@ -87,7 +91,9 @@ def main():
             quote_pass += qp
             row["quote_exact_substring"] = qp
             row["predicted_quote"] = p["evidence_quote"][:200]
-            row["quote_supports_label"] = ""          # human check, filled by hand
+            j = qsupport.get(rid)
+            row["quote_supports_label"] = j["quote_supports_label"] if j else ""
+            row["quote_support_reason"] = j["reason"] if j else ""
             pe = list(p.get("entities") or [])
             unsup = [e for e in pe if e.lower() not in text.lower()]
             ge_low = [e.lower() for e in gt["entities"]]
@@ -122,8 +128,11 @@ def main():
         "severity_mae": round(sum(sev_err) / n, 4),
         "sentiment_mae": round(sum(sent_err) / len(sent_err), 4) if sent_err else None,
         "sentiment_within_tolerance": {"tolerance": TOL, "share": round(sent_within / n, 4), "count": sent_within},
-        "evidence_quote_exact_substring": {"share": round(quote_pass / n, 4), "count": quote_pass,
-                                           "supports_label": "human check: see quote_supports_label in golden_cases.csv"},
+        "evidence_quote_exact_substring": {"share": round(quote_pass / n, 4), "count": quote_pass},
+        "evidence_quote_supports_label": ({"yes": sum(c.get("quote_supports_label") == "yes" for c in cases),
+                                           "no": sum(c.get("quote_supports_label") == "no" for c in cases),
+                                           "source": "evals/quote_support_judgments.csv (judged per review)"}
+                                          if qsupport else "not judged yet"),
         "entities": {"predicted": ent_pred_total, "unsupported_additions": ent_unsupported,
                      "unsupported_rate": round(ent_unsupported / ent_pred_total, 4) if ent_pred_total else 0.0,
                      "human_entities": ent_gold_total, "missed_by_model": ent_missed},
@@ -153,7 +162,9 @@ def main():
          f"- Intent agreement: {agree['intent']}/{n} ({res['agreement']['intent']:.0%})",
          f"- Severity exact agreement: {agree['severity']}/{n} ({res['agreement']['severity']:.0%}); MAE {res['severity_mae']}",
          f"- Sentiment MAE {res['sentiment_mae']}; within ±{TOL}: {sent_within}/{n}",
-         f"- Evidence quote exact substring (code): {quote_pass}/{n}. Whether each quote supports the label is a human check (column quote_supports_label).",
+         f"- Evidence quote exact substring (code): {quote_pass}/{n}.",
+         f"- Evidence quote supports the predicted topic and intent (judged per review): "
+         f"{sum(c.get('quote_supports_label') == 'yes' for c in cases)}/{n}; reasons for each 'no' in golden_cases.csv.",
          f"- Entities: {ent_pred_total} predicted, {ent_unsupported} unsupported additions; {ent_missed} of {ent_gold_total} human entities missed",
          f"- needs_review: both yes {tp}, model yes/human no {fp}, model no/human yes {fn}, both no {tn}; "
          f"precision {res['needs_review']['precision']}, recall {res['needs_review']['recall']}; "
