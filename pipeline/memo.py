@@ -144,6 +144,9 @@ def write_outputs(work, ranking, latest, issues, areas, evidence, decision):
     total = sum(int(r["complaint_count"]) for r in ranking.values())
     completed = sum(1 for r in latest.values() if r.get("status") == "completed")
     quarantined = sum(1 for r in latest.values() if r.get("status") == "quarantined")
+    quarantined += sum(1 for r in read_jsonl(Path(work) / "quarantine.jsonl") if r.get("review_id") not in latest)
+    sev5 = [r for r in latest.values() if r.get("status") == "completed"
+            and r.get("intent") in ("complaint", "cancellation") and r.get("severity") == 5]
     baseline_area = max(AREA_ISSUES, key=lambda a: (areas[a]["severity_sum"], a))
 
     def issue_line(iid):
@@ -197,7 +200,13 @@ def write_outputs(work, ranking, latest, issues, areas, evidence, decision):
               "effect is calculated or implied.",
               "- Labels come from an automated classifier (Jev). See the golden-set evaluation and verifier report "
               "for measured agreement and known errors.",
-              f"- Coverage: {completed:,} completed classifications and {quarantined:,} quarantined records in this run.",
+              f"- Coverage: {completed:,} completed classifications and {quarantined:,} quarantined records "
+              "(empty review text) in this run.",
+              f"- Severity 5 (serious money, privacy or data harm) is assigned to {len(sev5):,} complaint reviews; many only "
+              "mention paying for Premium, so level 5 is likely over-assigned by the compressed prompt. Recoding every 5 "
+              "as 4 leaves the issue order unchanged (see README, sensitivity check).",
+              "- ISS-OTHER (general criticism with no specific feature) has the largest score but is not a product area "
+              "the next quarter can target, so the recommendation compares the four named areas.",
               "- Topics are coarse issues (one per topic); sub-problems within an issue are named from a 25-quote "
               "sample and are indicative only.", ""]
     (mdir / "memo.md").write_text("\n".join(lines), encoding="utf-8")

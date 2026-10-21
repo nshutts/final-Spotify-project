@@ -52,5 +52,7 @@ Billing / support combines ISS-BILLING and ISS-SUPPORT; its counts are sums of t
 - Reviews are self-selected Google Play reviews from May 2022 to November 2023; they are not a sample of all users. Counts measure complaint volume in reviews, not prevalence among customers.
 - Cancellation language is expressed intent, not observed churn. No revenue, plan tier or retention effect is calculated or implied.
 - Labels come from an automated classifier (Jev). See the golden-set evaluation and verifier report for measured agreement and known errors.
-- Coverage: 660,609 completed classifications and 0 quarantined records in this run.
+- Coverage: 660,609 completed classifications and 13 quarantined records (empty review text) in this run.
+- Severity 5 (serious money, privacy or data harm) is assigned to 12,169 complaint reviews; many only mention paying for Premium, so level 5 is likely over-assigned by the compressed prompt. Recoding every 5 as 4 leaves the issue order unchanged (see README, sensitivity check).
+- ISS-OTHER (general criticism with no specific feature) has the largest score but is not a product area the next quarter can target, so the recommendation compares the four named areas.
 - Topics are coarse issues (one per topic); sub-problems within an issue are named from a 25-quote sample and are indicative only.
